@@ -8,18 +8,22 @@ use Grav\Common\Plugin;
  * Class PushyPlugin
  * @package Grav\Plugin
  */
-class PushyPlugin extends Plugin
-{
+class PushyPlugin extends Plugin {
+	/** @var GitSync */ // FIXME
+	protected $git;
+
+	/** @var string */
+	protected $admin_route = 'publish';
+
 	/**
 	 * @return array
 	 */
-	public static function getSubscribedEvents(): array
-	{
+	public static function getSubscribedEvents(): array {
 		return [
 			'onPluginsInitialized' => [
 				['onPluginsInitialized', 0],
-			]
-		];
+				],
+			];
 	}
 
 	/**
@@ -28,8 +32,7 @@ class PushyPlugin extends Plugin
 	 * @return ClassLoader
 	 */
 	/*
-	public function autoload(): ClassLoader
-	{
+	public function autoload(): ClassLoader	{
 		return require __DIR__ . '/vendor/autoload.php';
 	}
 	*/
@@ -37,16 +40,17 @@ class PushyPlugin extends Plugin
 	/**
 	 * Initialize the plugin
 	 */
-	public function onPluginsInitialized(): void
-	{
-		// Don't proceed if we are in the admin plugin
+	public function onPluginsInitialized(): void {
+		// $this->init(); // TODO
+
 		if ($this->isAdmin()) {
 			return;
 		}
 
-		// Enable the main events we are interested in
-		$this->enable([
-			// Put your main events here
-		]);
+		else {
+			$this->enable([
+				// Put your main events here
+				]);
+		}
 	}
 }

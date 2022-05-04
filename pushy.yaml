@@ -1,2 +1,8 @@
 enabled: true
-text_var: Custom Text added by the **Pushy** plugin (disable plugin to remove)
+folders:
+  # - pages
+  # - themes/gravory # for tests
+  - pages/40.recipes/106.holocene-porridge
+# git:
+#   bin: 
+logging: true

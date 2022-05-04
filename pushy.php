@@ -5,14 +5,16 @@ use Composer\Autoload\ClassLoader;
 use Grav\Common\Plugin;
 use Grav\Common\Page\Page;
 use RocketTheme\Toolbox\Event\Event;
+use Grav\Plugin\Pushy\PushyRepo;
+use Grav\Plugin\Pushy\GitUtils;
 
 /**
  * Class PushyPlugin
  * @package Grav\Plugin
  */
 class PushyPlugin extends Plugin {
-	/** @var GitSync */ // FIXME
-	protected $git;
+	/** @var PushyRepo */
+	protected $repo;
 
 	/** @var string */
 	protected $admin_route = 'publish';
@@ -33,17 +35,22 @@ class PushyPlugin extends Plugin {
 	 *
 	 * @return ClassLoader
 	 */
-	/*
 	public function autoload(): ClassLoader	{
 		return require __DIR__ . '/vendor/autoload.php';
 	}
-	*/
+
+	/**
+	 * Initialize the class instance
+	 */
+	public function init():void {
+		$this->repo = new PushyRepo();
+	}
 
 	/**
 	 * Initialize the plugin
 	 */
 	public function onPluginsInitialized(): void {
-		// $this->init(); // TODO
+		$this->init();
 
 		if ($this->isAdmin()) {
 			$this->enable([
@@ -73,8 +80,8 @@ class PushyPlugin extends Plugin {
 	 * Show the publishing menu item(s) in Admin
 	 */
 	public function showPublishingMenu(): void {
-		$isInitialized = $this->isGitInitialized();
-		// TODO: test for Helper::isGitInstalled()
+		$isInitialized = GitUtils::isGitInitialized();
+		// TODO: test for GitUtils::isGitInstalled()
 		$menuLabel = $isInitialized ? 'Publish' : 'Publishing';
 		$options = [
 			'hint' => $isInitialized ? 'Publish' : 'Publication settings',
@@ -88,7 +95,7 @@ class PushyPlugin extends Plugin {
 		$this->grav['twig']->plugins_hooked_nav[$menuLabel] = $options; // TODO: make this configurable in YAML/blueprint
 	}
 
-    public function routePages($event) { // TODO: stub
+    public function routePages($event): void { // TODO: stub
 		$publish_path = $this->config->get('plugins.admin.route') . DS . $this->admin_route;
 		$route = $this->grav['uri']->path();
 
@@ -102,21 +109,10 @@ class PushyPlugin extends Plugin {
 			$pages->addPage($page);
 			unset($this->grav['page']);
 			$this->grav['page'] = $page;
-			// dump($this->git);
-			// $twig = $this->grav['twig'];
-			// $twig->twig_vars['git_index'] = $this->git->statusSelect(); # TRUE, $env='index', $select='MTDRCA');
-		}
-	}
 
-	/**
-	 * Checks if the user/ folder is initialized as a Git repo
-	 *
-	 * @return bool
-	 */
-	// adapted/copied from GitSync Helper::isGitInitialized()
-	// TODO: move this to git class when I have one and rename
-	public static function isGitInitialized() {
-		return file_exists(rtrim(USER_DIR, '/') . '/.git');
+			$twig = $this->grav['twig'];
+			$twig->twig_vars['git_index'] = $this->repo->statusSelect(); # TRUE, $env='index', $select='MTDRCA');
+		}
 	}
 
 }

@@ -3,6 +3,8 @@ namespace Grav\Plugin;
 
 use Composer\Autoload\ClassLoader;
 use Grav\Common\Plugin;
+use Grav\Common\Page\Page;
+use RocketTheme\Toolbox\Event\Event;
 
 /**
  * Class PushyPlugin
@@ -45,7 +47,9 @@ class PushyPlugin extends Plugin {
 
 		if ($this->isAdmin()) {
 			$this->enable([
+				'onTwigSiteVariables' => ['routePages', 0],
 				'onAdminMenu' => ['showPublishingMenu', 0],
+				'onAdminTwigTemplatePaths'  => ['setAdminTwigTemplatePaths', 0],
 				]);
 		}
 
@@ -54,6 +58,15 @@ class PushyPlugin extends Plugin {
 				// Put your main events here
 				]);
 		}
+	}
+
+	/**
+	 * Get admin page template
+	 */
+	public function setAdminTwigTemplatePaths(Event $event): void {
+		$paths = $event['paths'];
+		$paths[] = __DIR__ . DS . 'admin/templates';
+		$event['paths'] = $paths;
 	}
 
 	/**
@@ -73,6 +86,26 @@ class PushyPlugin extends Plugin {
 			];
 
 		$this->grav['twig']->plugins_hooked_nav[$menuLabel] = $options; // TODO: make this configurable in YAML/blueprint
+	}
+
+    public function routePages($event) { // TODO: stub
+		$publish_path = $this->config->get('plugins.admin.route') . DS . $this->admin_route;
+		$route = $this->grav['uri']->path();
+
+		if ($route == $publish_path) {
+
+			$page = new Page();
+			$page->init(new \SplFileInfo(__DIR__ . '/admin/pages/publish.md'));
+
+			/** @var Pages */
+			$pages = $this->grav['pages'];
+			$pages->addPage($page);
+			unset($this->grav['page']);
+			$this->grav['page'] = $page;
+			// dump($this->git);
+			// $twig = $this->grav['twig'];
+			// $twig->twig_vars['git_index'] = $this->git->statusSelect(); # TRUE, $env='index', $select='MTDRCA');
+		}
 	}
 
 	/**

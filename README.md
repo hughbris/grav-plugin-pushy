@@ -1,6 +1,8 @@
 # Pushy Plugin
 
-The **Pushy** Plugin is an extension for [Grav CMS](https://github.com/getgrav/grav). Publish ("push") changes to your production environment from your editing (or development or other) environment Admin dashboard.
+The **Pushy** Plugin is an extension for [Grav CMS](https://github.com/getgrav/grav).
+
+Publish ("push") changes to your production environment from your editing (or development or other) environment Admin dashboard.
 
 This plugin uses Git and is heavily inspired by the [GitSync plugin](https://github.com/trilbymedia/grav-plugin-git-sync). Unlike GitSync, however, there is a lot more manual setup by the developer, less (IMHO) scary magic, and more control.
 
@@ -67,7 +69,7 @@ Note that if you use the Admin Plugin, a file with your configuration named push
 
 ## Credits
 
-* [GitSync plugin](https://github.com/trilbymedia/grav-plugin-git-sync) from Trilby Media (mostly @woofz I think) for inspiration and some code
+* [GitSync plugin](https://github.com/trilbymedia/grav-plugin-git-sync) from Trilby Media (mostly @w00fz I think) for inspiration and some code
 * @pamtbaau for assistance with some obscure undocumented Admin techniques that had me stumped
 
 ## To Do
@@ -76,4 +78,5 @@ Note that if you use the Admin Plugin, a file with your configuration named push
 - [ ] Allow user selection of changes to commit/publish with checkboxes - possibly even an equivalent to `git add -p`
 - [ ] Show newly created files within new folders to be clearer - Git currently only shows folders and this could be confusing for new pages (is there a Git option for this??)
 - [ ] Remove folder prefixes from previews of changes if possible
-- [ ] Flex these items out into proper GH issues
+- [ ] Allow pull updates to sync with a branch on origin (..auth required)
+- [ ] Break these items out into proper GH issues

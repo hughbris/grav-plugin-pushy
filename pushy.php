@@ -104,12 +104,6 @@ class PushyPlugin extends Plugin {
 			$page = new Page();
 			$page->init(new \SplFileInfo(__DIR__ . '/admin/pages/publish.md'));
 
-			/** @var Pages */
-			$pages = $this->grav['pages'];
-			$pages->addPage($page);
-			unset($this->grav['page']);
-			$this->grav['page'] = $page;
-
 			$twig = $this->grav['twig'];
 			$twig->twig_vars['git_index'] = $this->repo->statusSelect(); # TRUE, $env='index', $select='MTDRCA');
 		}

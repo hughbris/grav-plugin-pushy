@@ -1,8 +1,20 @@
 # Pushy Plugin
 
-**This README.md file should be modified to describe the features, installation, configuration, and general usage of the plugin.**
+The **Pushy** Plugin is an extension for [Grav CMS](https://github.com/getgrav/grav). Publish ("push") changes to your production environment from your editing (or development or other) environment Admin dashboard.
 
-The **Pushy** Plugin is an extension for [Grav CMS](https://github.com/getgrav/grav). Push with Git to publish changes to your production environment
+This plugin uses Git and is heavily inspired by the [GitSync plugin](https://github.com/trilbymedia/grav-plugin-git-sync). Unlike GitSync, however, there is a lot more manual setup by the developer, less (IMHO) scary magic, and more control.
+
+<!-- TODO: feature comparson table -->
+
+The primary use case for Pushy is so that non-technical content editors can edit (primarily) pages on another Grav instance using Grav Admin, and then push their changes from there to the production server instance. This is all tracked by Git and easy to revert.
+
+The advantages of pushing from an editing environment are:
+
+* it provides a safe sandbox, you won't break production;
+* it opens up the possibility of multiple content editors;
+* there is no need to install the Admin plugin on your production Grav instance.
+
+I took Git out of the plugin name and user interface because content editors and other non-technical users don't care.
 
 ## Installation
 
@@ -10,11 +22,14 @@ Installing the Pushy plugin can be done in one of three ways: The GPM (Grav Pack
 
 ### GPM Installation (Preferred)
 
+> This option will be available if/when this plugin is mature enough to be accepted into the official Grav plugin repository.
+<!--
 To install the plugin via the [GPM](https://learn.getgrav.org/cli-console/grav-cli-gpm), through your system's terminal (also called the command line), navigate to the root of your Grav-installation, and enter:
 
     bin/gpm install pushy
 
 This will install the Pushy plugin into your `/user/plugins`-directory within Grav. Its files can be found under `/your/site/grav/user/plugins/pushy`.
+-->
 
 ### Manual Installation
 
@@ -42,15 +57,21 @@ enabled: true
 
 Note that if you use the Admin Plugin, a file with your configuration named pushy.yaml will be saved in the `user/config/plugins/`-folder once the configuration is saved in the Admin.
 
+> Because this plugin requires a developer to set it up, creating Admin blueprints is a low priority enhancement. Please edit the YAML instead.
+
 ## Usage
 
 **Describe how to use the plugin.**
 
 ## Credits
 
-**Did you incorporate third-party code? Want to thank somebody?**
+* [GitSync plugin](https://github.com/trilbymedia/grav-plugin-git-sync) from Trilby Media (mostly @woofz I think) for inspiration and some code
+* @pamtbaau for assistance with some obscure undocumented Admin techniques that had me stumped
 
 ## To Do
 
-- [ ] Future plans, if any
-
+- [ ] Switch the Save page button label to 'Save Draft' and stage the edit to the git index on save - this allows git edits to be attributed to the current user reliably, but seems messy with unstaging some changes especially for renames + edits
+- [ ] Allow user selection of changes to commit/publish with checkboxes - possibly even an equivalent to `git add -p`
+- [ ] Show newly created files within new folders to be clearer - Git currently only shows folders and this could be confusing for new pages (is there a Git option for this??)
+- [ ] Remove folder prefixes from previews of changes if possible
+- [ ] Flex these items out into proper GH issues

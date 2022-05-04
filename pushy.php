@@ -44,7 +44,9 @@ class PushyPlugin extends Plugin {
 		// $this->init(); // TODO
 
 		if ($this->isAdmin()) {
-			return;
+			$this->enable([
+				'onAdminMenu' => ['showPublishingMenu', 0],
+				]);
 		}
 
 		else {
@@ -53,4 +55,35 @@ class PushyPlugin extends Plugin {
 				]);
 		}
 	}
+
+	/**
+	 * Show the publishing menu item(s) in Admin
+	 */
+	public function showPublishingMenu(): void {
+		$isInitialized = $this->isGitInitialized();
+		// TODO: test for Helper::isGitInstalled()
+		$menuLabel = $isInitialized ? 'Publish' : 'Publishing';
+		$options = [
+			'hint' => $isInitialized ? 'Publish' : 'Publication settings',
+			'location' => 'pages',
+			'route' => $isInitialized ? $this->admin_route : "plugins/{$this->name}",
+			'icon' => 'fa-' . ($isInitialized ? $this->grav['plugins']->get($this->name)->blueprints()->get('icon') : 'cog'),
+			// 'class' => '',
+			// 'data' => [],
+			];
+
+		$this->grav['twig']->plugins_hooked_nav[$menuLabel] = $options; // TODO: make this configurable in YAML/blueprint
+	}
+
+	/**
+	 * Checks if the user/ folder is initialized as a Git repo
+	 *
+	 * @return bool
+	 */
+	// adapted/copied from GitSync Helper::isGitInitialized()
+	// TODO: move this to git class when I have one and rename
+	public static function isGitInitialized() {
+		return file_exists(rtrim(USER_DIR, '/') . '/.git');
+	}
+
 }

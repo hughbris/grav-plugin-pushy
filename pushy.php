@@ -54,9 +54,9 @@ class PushyPlugin extends Plugin {
 
 		if ($this->isAdmin()) {
 			$this->enable([
-				'onTwigSiteVariables' => ['routePages', 0],
-				'onAdminMenu' => ['showPublishingMenu', 0],
 				'onAdminTwigTemplatePaths'  => ['setAdminTwigTemplatePaths', 0],
+				'onAdminMenu' => ['showPublishingMenu', 0],
+				'onTwigSiteVariables' => ['setTwigSiteVariables', 0],
 				]);
 		}
 
@@ -95,15 +95,14 @@ class PushyPlugin extends Plugin {
 		$this->grav['twig']->plugins_hooked_nav[$menuLabel] = $options; // TODO: make this configurable in YAML/blueprint
 	}
 
-    public function routePages($event): void { // TODO: stub
+	/**
+	 * Set any special variables for Twig templates
+	 */
+	public function setTwigSiteVariables($event): void {
 		$publish_path = $this->config->get('plugins.admin.route') . DS . $this->admin_route;
 		$route = $this->grav['uri']->path();
 
 		if ($route == $publish_path) {
-
-			$page = new Page();
-			$page->init(new \SplFileInfo(__DIR__ . '/admin/pages/publish.md'));
-
 			$twig = $this->grav['twig'];
 			$twig->twig_vars['git_index'] = $this->repo->statusSelect(); # TRUE, $env='index', $select='MTDRCA');
 		}

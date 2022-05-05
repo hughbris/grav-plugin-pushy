@@ -76,7 +76,7 @@ Note that if you use the Admin Plugin, a file with your configuration named push
 
 - [ ] Switch the Save page button label to 'Save Draft' and stage the edit to the git index on save - this allows git edits to be attributed to the current user reliably, but seems messy with unstaging some changes especially for renames + edits
 - [ ] Allow user selection of changes to commit/publish with checkboxes - possibly even an equivalent to `git add -p`
-- [ ] Show newly created files within new folders to be clearer - Git currently only shows folders and this could be confusing for new pages (is there a Git option for this??)
+- [x] Show newly created files within new folders to be clearer - Git currently only shows folders and this could be confusing for new pages (is there a Git option for this??) _`-u` made this easily solved_
 - [ ] Remove folder prefixes from previews of changes if possible
 - [ ] Allow pull updates to sync with a branch on origin (..auth required)
 - [ ] Break these items out into proper GH issues

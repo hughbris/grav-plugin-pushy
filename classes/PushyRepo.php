@@ -49,7 +49,7 @@ class PushyRepo extends Git {
 	 * @return array
 	 */
 	private function statusLines($filter=TRUE) {
-		$command = 'status --find-renames --porcelain';
+		$command = 'status -u --find-renames --porcelain';
 		if ($filter) {
 			$command .= ' ' . implode(' ', $this->config['folders']);
 		}

@@ -133,22 +133,34 @@ class PushyPlugin extends Plugin {
 				}
 			}
 
-			// TODO: parse the request for branch/tag and do other condition filtering here - respond with 202 and a "void" status or something (possibly even https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/204 ??)
+			// TODO: check for $this->grav['uri']->uri() == $webhooks['path'] here and provide a service catalogue??
 
-			// TODO: possibly branch into other hooks here, not just /pull
-			try {
-				# $this->synchronize();
-				$this->jsonRespond(202, [
-					'status' => 'success',
-					'message' => 'Operation succeeded',
-					]);
+			foreach ($webhooks['endpoints'] as $hook => $hook_properties) {
+
+				// match on the endpoint
+				$endpoint = strtolower(implode('/', [$webhooks['path'], $hook]));
+				if(strtolower($this->grav['uri']->uri()) ==  $endpoint) {
+
+					// TODO: check declared conditions
+					try {
+						// TODO: perform the named scheduled task
+
+						$this->jsonRespond(202, [
+							'status' => 'success',
+							'message' => 'Operation succeeded',
+							'debug' => $hook_properties,
+							]);
+					}
+					catch (\Exception $e) {
+						$this->jsonRespond(500, [
+							'status' => 'error',
+							'message' => 'Operation failed',
+							'debug' => $hook_properties,
+							]);
+					}
+				}
 			}
-			catch (\Exception $e) {
-				$this->jsonRespond(500, [
-					'status' => 'error',
-					'message' => 'Operation failed',
-					]);
-			}
+
 		}
 	}
 

@@ -22,7 +22,7 @@ I took Git out of the plugin name and user interface because content editors and
 
 Installing the Pushy plugin can be done in one of three ways: The GPM (Grav Package Manager) installation method lets you quickly install the plugin with a simple terminal command, the manual method lets you do so via a zip file, and the admin method lets you do so via the Admin Plugin.
 
-> You may need to run `composer install`. I haven't tried this yet, so FIXME on that!!
+> After folowing one of the download steps described below, **you need to run `composer install` at the command line from the plugin diectory.** This installs the PHP libraries needed by this plugin. Be sure to run this, if possible, _as the same user that Grav runs as_, otherwise you may need to fix the file permissions of this plugin's `vendor` directory.
 
 ### GPM Installation (Preferred)
 

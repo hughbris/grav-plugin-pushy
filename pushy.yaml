@@ -6,3 +6,7 @@ folders:
 # git:
 #   bin: 
 logging: true
+webhooks:
+  enabled: true
+  path: /_webhooks
+  # secret: 

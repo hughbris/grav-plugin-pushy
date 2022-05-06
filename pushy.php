@@ -117,7 +117,7 @@ class PushyPlugin extends Plugin {
 		$page = $this->grav['page'] ?? NULL; // CHECKME: may not need this
 		// dump($this->grav['uri']->uri(), is_null($page->route())); return;
 
-		if (/* is_null($page->route()) && */ $this->grav['uri']->uri() == $webhooks['path']) { // TODO: just check for uri starting with path here
+		if (strpos($this->grav['uri']->uri(), $webhooks['path']) === 0) { // is_null($page->route()) &&
 
 			if (strtoupper($_SERVER['REQUEST_METHOD']) != 'POST') {
 				http_response_code(405);

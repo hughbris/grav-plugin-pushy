@@ -118,37 +118,36 @@ class PushyPlugin extends Plugin {
 		// dump($this->grav['uri']->uri(), is_null($page->route())); return;
 
 		if (/* is_null($page->route()) && */ $this->grav['uri']->uri() == $webhooks['path']) { // TODO: just check for uri starting with path here
-			if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-				if ($webhooks['secret'] ?? false) {
-					if (!$this->isWebhookAuthenticated($webhooks['secret'])) {
-						$this->jsonRespond(401, [
-							'status' => 'error',
-							'message' => 'Unauthorized request',
-							]);
-					}
-				}
+			if (strtoupper($_SERVER['REQUEST_METHOD']) != 'POST') {
+				http_response_code(405);
+				exit;
+			}
 
-				// TODO: parse the request for branch/tag and do other condition filtering here - respond with 202 and a "void" status or something (possibly even https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/204 ??)
-
-				// TODO: possibly branch into other hooks here, not just /pull
-				try {
-					# $this->synchronize();
-					$this->jsonRespond(202, [
-						'status' => 'success',
-						'message' => 'Operation succeeded',
-						]);
-				}
-				catch (\Exception $e) {
-					$this->jsonRespond(500, [
+			if ($webhooks['secret'] ?? false) {
+				if (!$this->isWebhookAuthenticated($webhooks['secret'])) {
+					$this->jsonRespond(401, [
 						'status' => 'error',
-						'message' => 'Operation failed',
+						'message' => 'Unauthorized request',
 						]);
 				}
 			}
-			else {
-				http_response_code(405);
-				exit;
+
+			// TODO: parse the request for branch/tag and do other condition filtering here - respond with 202 and a "void" status or something (possibly even https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/204 ??)
+
+			// TODO: possibly branch into other hooks here, not just /pull
+			try {
+				# $this->synchronize();
+				$this->jsonRespond(202, [
+					'status' => 'success',
+					'message' => 'Operation succeeded',
+					]);
+			}
+			catch (\Exception $e) {
+				$this->jsonRespond(500, [
+					'status' => 'error',
+					'message' => 'Operation failed',
+					]);
 			}
 		}
 	}

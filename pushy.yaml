@@ -10,3 +10,9 @@ webhooks:
   enabled: true
   path: /_webhooks
   # secret: 
+  endpoints:
+    'publish':
+      # run: 
+      conditions:
+        # branch: 
+        # committer: 

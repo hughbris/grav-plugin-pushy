@@ -141,25 +141,42 @@ class PushyPlugin extends Plugin {
 				$endpoint = strtolower(implode('/', [$webhooks['path'], $hook]));
 				if(strtolower($this->grav['uri']->uri()) ==  $endpoint) {
 
-					// TODO: check declared conditions
-					try {
-						// TODO: perform the named scheduled task
+					// let's grab that payload
+					$payload = file_get_contents('php://input');
+					$payload = !empty($payload) ? json_decode($payload) : FALSE;
+					if($payload) {
 
-						$this->jsonRespond(202, [
-							'status' => 'success',
-							'message' => 'Operation succeeded',
-							'debug' => $hook_properties,
-							]);
+						// TODO: check declared conditions
+						// array_key_exists('conditions', $hook_properties)) {
+
+						try {
+							// TODO: perform the named scheduled task
+
+							$this->jsonRespond(202, [
+								'status' => 'success',
+								'message' => 'Operation succeeded',
+								'debug' => $hook_properties,
+								'payload' => $payload,
+								]);
+						}
+						catch (\Exception $e) {
+							$this->jsonRespond(500, [
+								'status' => 'error',
+								'message' => 'Operation failed',
+								'debug' => $hook_properties,
+								]);
+						}
 					}
-					catch (\Exception $e) {
-						$this->jsonRespond(500, [
-							'status' => 'error',
-							'message' => 'Operation failed',
-							'debug' => $hook_properties,
-							]);
-					}
+					// TODO: else (no payload)
+					$this->jsonRespond(418, [
+						'status' => 'undefined',
+						'message' => 'No payload, am teapot FIXME',
+						'debug' => $hook_properties,
+						]);
 				}
 			}
+
+			// TODO: fallback if execution reaches here to 404 ?? (it happens anyway I think)
 
 		}
 	}

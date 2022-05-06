@@ -65,7 +65,20 @@ Note that if you use the Admin Plugin, a file with your configuration named push
 
 ## Usage
 
-**Describe how to use the plugin.**
+The plugin is built with a specific workflow and technical stack in mind, but may be adaptable or extensible.
+
+The goal is to edit changes in one environment ("E") and "push" them up to a git host ("`origin`"), which is then picked up and the changes are pulled down to a receiving environment ("R"). Typically, _E_ would be a Grav installation with the Admin plugin where a content editor works. `Origin` would be a repository on something like Github. _R_ would be a production server.
+
+<!-- TODO: illustrate this with a diagram -->
+
+Your Grav Git repository is assumed to be under your `user` directory. Here is the process in more detail:
+
+* On _E_, the Git repo's current branch is one you have set up for edits from your Admin user.
+* Changes to the repository are committed through the Admin dashboard when the editor presses a button.
+* A githook has been set up to push any commits in that branch up to `origin`.
+* A webhook has been set up on your `origin` git provider for that repository to trigger a notification to _R_ on push events.
+* _R_ has this plugin configured to respond by triggering an inactive Grav scheduled task (so _not_ technically scheduled) on these notifications (TBC).
+* The inactive scheduled task performs a sequence something like: check branch → pull → merge &lt;branch> → tag.
 
 ## Credits
 
@@ -79,4 +92,9 @@ Note that if you use the Admin Plugin, a file with your configuration named push
 - [x] Show newly created files within new folders to be clearer - Git currently only shows folders and this could be confusing for new pages (is there a Git option for this??) _`-u` made this easily solved_
 - [ ] Remove folder prefixes from previews of changes if possible
 - [ ] Allow pull updates to sync with a branch on origin (..auth required)
+- [ ] Add an authorisation permission to publish
+- [ ] Provide a "wizard" to generate githook code that can be copied, with instructions
+- [ ] Potentially move the webhooks to a separate plugin
+- [ ] Route and respond to webhooks
+- [ ] Perhaps allow webhook URLs to map to _(non-)_ scheduled tasks to be triggered in response
 - [ ] Break these items out into proper GH issues

@@ -119,16 +119,13 @@ class PushyPlugin extends Plugin {
 
 		if (/* is_null($page->route()) && */ $this->grav['uri']->uri() == $webhooks['path']) { // TODO: just check for uri starting with path here
 			if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-				header('Content-Type: application/json');
+
 				if ($webhooks['secret'] ?? false) {
 					if (!$this->isWebhookAuthenticated($webhooks['secret'])) {
-						http_response_code(401);
-						// TODO: 'WWW-Authenticate' header here??
-						echo json_encode([
+						$this->jsonRespond(401, [
 							'status' => 'error',
 							'message' => 'Unauthorized request',
 							]);
-						exit;
 					}
 				}
 
@@ -137,24 +134,22 @@ class PushyPlugin extends Plugin {
 				// TODO: possibly branch into other hooks here, not just /pull
 				try {
 					# $this->synchronize();
-					http_response_code(202);
-					echo json_encode([
+					$this->jsonRespond(202, [
 						'status' => 'success',
-						'message' => 'GitSync completed the synchronization',
+						'message' => 'Operation succeeded',
 						]);
 				}
 				catch (\Exception $e) {
-					http_response_code(500);
-					echo json_encode([
+					$this->jsonRespond(500, [
 						'status' => 'error',
-						'message' => 'GitSync failed to synchronize',
+						'message' => 'Operation failed',
 						]);
 				}
 			}
 			else {
 				http_response_code(405);
+				exit;
 			}
-			exit;
 		}
 	}
 
@@ -222,6 +217,19 @@ class PushyPlugin extends Plugin {
 			return hash_equals($secret, $payload['secret']);
 		}
 		return FALSE;
+	}
+
+	/**
+	 * Provide a HTTP status and JSON response and exit
+	 * @param  int    $http_status   HTTP status number to return
+	 * @param  array  $proto_payload Payload as array to be served as JSON
+	 * @return void
+	 */
+	private function jsonRespond(int $http_status, array $proto_payload): void {
+		header('Content-Type: application/json');
+		http_response_code($http_status);
+		echo json_encode($proto_payload);
+		exit;
 	}
 
 }

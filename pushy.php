@@ -183,17 +183,17 @@ class PushyPlugin extends Plugin {
 	}
 
 	/**
-	 * Hashes the webhook request body with the client secret and
-	 * checks if it matches the webhook signature header
+	 * Hashes the webhook request body with the client secret and checks if it matches the webhook signature header
 	 * @param  string $secret The webhook secret
 	 * @param  string $signatureHeader The signature of the webhook request
 	 * @param  string $payload The webhook request body
 	 * @return bool            whether the signature is valid or not
 	 */
+	// copied from GitSync base class method but uses more secure hash_equals()
 	private function isGithubSignatureValid($secret, $signatureHeader, $payload): bool {
 		[$algorithm, $signature] = explode('=', $signatureHeader);
 
-		return $signature === hash_hmac($algorithm, $payload, $secret); // TODO: try hash_equals($signature, hash_hmac($algorithm, $payload, $secret)), more secure
+		return hash_equals($signature, hash_hmac($algorithm, $payload, $secret));
 	}
 
 	/**
@@ -202,22 +202,24 @@ class PushyPlugin extends Plugin {
 	 * @param  string $token token received from Gitlab webhook request
 	 * @return bool          whether or not secret and token match
 	 */
+	// copied from GitSync base class method but uses more secure hash_equals()
+	// TODO: untested
 	private function isGitlabTokenValid($secret, $token): bool {
-		return $secret === $token; // TODO: try hash_equals($secret === $token), more secure
+		return hash_equals($secret === $token);
 	}
 
 	/**
-	 * Returns true if secret contained in the payload matches the client
-	 * secret
+	 * Returns true if secret contained in the payload matches the client secret
 	 * @param  string $secret The webhook secret
 	 * @param  string $payload The webhook request body
-	 * @return bool            whether the client secret matches the payload secret or
-	 * not
+	 * @return bool            whether the client secret matches the payload secret or not
 	 */
+	// copied from GitSync base class method but uses more secure hash_equals()
+	// TODO: untested
 	private function isGiteaSecretValid($secret, $payload): bool {
 		$payload = json_decode($payload, TRUE);
 		if (!empty($payload) && isset($payload['secret'])) {
-			return $secret === $payload['secret']; // TODO: try hash_equals($secret, $payload['secret']), more secure
+			return hash_equals($secret, $payload['secret']);
 		}
 		return FALSE;
 	}

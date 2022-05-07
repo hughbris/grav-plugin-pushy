@@ -155,19 +155,24 @@ class PushyPlugin extends Plugin {
 
 					// check declared conditions
 					if (array_key_exists('conditions', $hook_properties)) {
+
 						$conditions = $hook_properties['conditions'];
-					}
-						
-					if(isset($conditions) && (
-							array_key_exists('branch', $conditions) && 
-							($this->parsePayload($payload, 'branch') !== $conditions['branch'])
-							)
-						) {
-						$this->jsonRespond(418, [ // FIXME: condition not met??
-							'status' => 'undefined',
-							'message' => 'Branch condition not met',
-							'debug' => $hook_properties,
-							]);
+
+						if(array_key_exists('branch', $conditions) && ($this->parsePayload($payload, 'branch') !== $conditions['branch'])) {
+							$this->jsonRespond(418, [ // FIXME: condition not met??
+								'status' => 'undefined',
+								'message' => 'Branch constraint not met',
+								'debug' => $hook_properties,
+								]);
+							}
+
+						if(array_key_exists('committer', $conditions) && ($this->parsePayload($payload, 'committer') !== $conditions['committer'])) {
+							$this->jsonRespond(418, [ // FIXME: condition not met??
+								'status' => 'undefined',
+								'message' => 'Committer constraint not met',
+								'debug' => $this->parsePayload($payload, 'committer'),
+								]);
+							}
 					}
 
 					try {
@@ -288,7 +293,10 @@ class PushyPlugin extends Plugin {
 				if (property_exists($payload, 'ref')) {
 					return substr($payload->ref, strlen('refs/heads/'));
 				}
-				break; // unnecessary because return
+			case 'committer':
+				if (property_exists($payload, 'pusher') && property_exists($payload->pusher, 'email')) {
+					return $payload->pusher->email;
+				}
 		}
 		// fallback
 		return NULL;

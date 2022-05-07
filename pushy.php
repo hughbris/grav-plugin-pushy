@@ -147,25 +147,34 @@ class PushyPlugin extends Plugin {
 					if($payload) {
 
 						// TODO: check declared conditions
-						// array_key_exists('conditions', $hook_properties)) {
+						if (array_key_exists('conditions', $hook_properties)) {
+							$conditions = $hook_properties['conditions'];
 
-						try {
-							// TODO: perform the named scheduled task
+							if(array_key_exists('branch', $conditions) && ($this->parsePayload($payload, 'branch') === $conditions['branch'])) {
 
-							$this->jsonRespond(202, [
-								'status' => 'success',
-								'message' => 'Operation succeeded',
-								'debug' => $hook_properties,
-								'payload' => $payload,
-								]);
+								try {
+									// TODO: perform the named scheduled task
+
+									$this->jsonRespond(202, [
+										'status' => 'success',
+										'message' => 'Operation succeeded',
+										'debug' => $hook_properties,
+										// 'payload' => $payload,
+										'branch' => $this->parsePayload($payload, 'branch'),
+										'jbranch' => $payload->ref,
+										]);
+								}
+								catch (\Exception $e) {
+									$this->jsonRespond(500, [
+										'status' => 'error',
+										'message' => 'Operation failed',
+										'debug' => $hook_properties,
+										]);
+								}
+							}
+							// TODO: else
 						}
-						catch (\Exception $e) {
-							$this->jsonRespond(500, [
-								'status' => 'error',
-								'message' => 'Operation failed',
-								'debug' => $hook_properties,
-								]);
-						}
+						// TODO: else (condition not met??)
 					}
 					// TODO: else (no payload)
 					$this->jsonRespond(418, [
@@ -258,6 +267,24 @@ class PushyPlugin extends Plugin {
 		http_response_code($http_status);
 		echo json_encode($proto_payload);
 		exit;
+	}
+
+	/**
+	 * Parse JSON payloads and extract key properties
+	 * @param  object $payload       JSON-decoded payload string
+	 * @param  string $component     Enumerated standard element name to be extracted
+	 * @return mixed
+	 */
+	private function parsePayload($payload, $component) {
+		switch($component) {
+			case 'branch':
+				if (property_exists($payload, 'ref')) {
+					return substr($payload->ref, strlen('refs/heads/'));
+				}
+				break; // unnecessary because return
+		}
+		// fallback
+		return NULL;
 	}
 
 }

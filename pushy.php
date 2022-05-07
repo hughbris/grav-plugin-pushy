@@ -187,7 +187,7 @@ class PushyPlugin extends Plugin {
 					try {
 						// TODO: perform the named scheduled task
 
-						$this->jsonRespond(202, [
+						$this->jsonRespond(200, [
 							'status' => 'success',
 							'message' => 'Operation succeeded',
 							'debug' => $hook_properties,

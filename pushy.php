@@ -141,6 +141,15 @@ class PushyPlugin extends Plugin {
 				$endpoint = strtolower(implode('/', [$webhooks['path'], $hook]));
 				if(strtolower($this->grav['uri']->uri()) ==  $endpoint) {
 
+					// check for declared hook response action
+					if (!array_key_exists('run', $hook_properties)) {
+						$this->jsonRespond(418, [
+							'status' => 'undefined',
+							'message' => 'Am teapot, no operation specified or performed',
+							'debug' => $hook_properties,
+							]);
+					}
+
 					// let's grab that payload
 					$payload = file_get_contents('php://input');
 					$payload = !empty($payload) ? json_decode($payload) : FALSE;

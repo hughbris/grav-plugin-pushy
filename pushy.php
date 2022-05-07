@@ -120,8 +120,10 @@ class PushyPlugin extends Plugin {
 		if (strpos($this->grav['uri']->uri(), $webhooks['path']) === 0) { // is_null($page->route()) &&
 
 			if (strtoupper($_SERVER['REQUEST_METHOD']) != 'POST') {
-				http_response_code(405);
-				exit;
+				$this->jsonRespond(405, [
+					'status' => 'error',
+					'message' => 'Only POST operations supported',
+					]);
 			}
 
 			if ($webhooks['secret'] ?? false) {

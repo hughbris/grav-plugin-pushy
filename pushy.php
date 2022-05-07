@@ -144,44 +144,51 @@ class PushyPlugin extends Plugin {
 					// let's grab that payload
 					$payload = file_get_contents('php://input');
 					$payload = !empty($payload) ? json_decode($payload) : FALSE;
-					if($payload) {
 
-						// TODO: check declared conditions
-						if (array_key_exists('conditions', $hook_properties)) {
-							$conditions = $hook_properties['conditions'];
-
-							if(array_key_exists('branch', $conditions) && ($this->parsePayload($payload, 'branch') === $conditions['branch'])) {
-
-								try {
-									// TODO: perform the named scheduled task
-
-									$this->jsonRespond(202, [
-										'status' => 'success',
-										'message' => 'Operation succeeded',
-										'debug' => $hook_properties,
-										// 'payload' => $payload,
-										'branch' => $this->parsePayload($payload, 'branch'),
-										'jbranch' => $payload->ref,
-										]);
-								}
-								catch (\Exception $e) {
-									$this->jsonRespond(500, [
-										'status' => 'error',
-										'message' => 'Operation failed',
-										'debug' => $hook_properties,
-										]);
-								}
-							}
-							// TODO: else
-						}
-						// TODO: else (condition not met??)
+					if(!$payload) { // TODO: (no payload)
+						$this->jsonRespond(418, [
+							'status' => 'undefined',
+							'message' => 'No payload, am teapot FIXME',
+							'debug' => $hook_properties,
+							]);
 					}
-					// TODO: else (no payload)
-					$this->jsonRespond(418, [
-						'status' => 'undefined',
-						'message' => 'No payload, am teapot FIXME',
-						'debug' => $hook_properties,
-						]);
+
+					// check declared conditions
+					if (array_key_exists('conditions', $hook_properties)) {
+						$conditions = $hook_properties['conditions'];
+					}
+						
+					if(isset($conditions) && (
+							array_key_exists('branch', $conditions) && 
+							($this->parsePayload($payload, 'branch') !== $conditions['branch'])
+							)
+						) {
+						$this->jsonRespond(418, [ // FIXME: condition not met??
+							'status' => 'undefined',
+							'message' => 'Branch condition not met',
+							'debug' => $hook_properties,
+							]);
+					}
+
+					try {
+						// TODO: perform the named scheduled task
+
+						$this->jsonRespond(202, [
+							'status' => 'success',
+							'message' => 'Operation succeeded',
+							'debug' => $hook_properties,
+							// 'payload' => $payload,
+							'branch' => $this->parsePayload($payload, 'branch'),
+							'jbranch' => $payload->ref,
+							]);
+					}
+					catch (\Exception $e) {
+						$this->jsonRespond(500, [
+							'status' => 'error',
+							'message' => 'Operation failed',
+							'debug' => $hook_properties,
+							]);
+					}
 				}
 			}
 

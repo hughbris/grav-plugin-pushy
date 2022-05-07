@@ -128,6 +128,16 @@ class PushyPlugin extends Plugin {
 				}
 			}
 
+			$endpoints = $webhooks['endpoints'] ?: [];
+
+			// check if the request path is an exact match with the webhook root path
+			if($this->grav['uri']->uri() == $webhooks['path']) {
+				$this->jsonRespond(300, [
+					'status' => 'info',
+					'message' => ('Available endpoints are: ' . implode(', ', array_keys($endpoints))),
+					]);
+			}
+
 			if (strtoupper($_SERVER['REQUEST_METHOD']) != 'POST') {
 				$this->jsonRespond(405, [
 					'status' => 'error',
@@ -135,9 +145,7 @@ class PushyPlugin extends Plugin {
 					]);
 			}
 
-			// TODO: check for $this->grav['uri']->uri() == $webhooks['path'] here and provide a service catalogue??
-
-			foreach ($webhooks['endpoints'] as $hook => $hook_properties) {
+			foreach ($endpoints as $hook => $hook_properties) {
 
 				// match on the endpoint
 				$endpoint = strtolower(implode('/', [$webhooks['path'], $hook]));

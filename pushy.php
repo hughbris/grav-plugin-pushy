@@ -145,10 +145,10 @@ class PushyPlugin extends Plugin {
 					$payload = file_get_contents('php://input');
 					$payload = !empty($payload) ? json_decode($payload) : FALSE;
 
-					if(!$payload) { // TODO: (no payload)
-						$this->jsonRespond(418, [
+					if(!$payload) {
+						$this->jsonRespond(400, [
 							'status' => 'undefined',
-							'message' => 'No payload, am teapot FIXME',
+							'message' => 'No payload or invalid payload',
 							'debug' => $hook_properties,
 							]);
 					}
@@ -159,7 +159,7 @@ class PushyPlugin extends Plugin {
 						$conditions = $hook_properties['conditions'];
 
 						if(array_key_exists('branch', $conditions) && ($this->parsePayload($payload, 'branch') !== $conditions['branch'])) {
-							$this->jsonRespond(418, [ // FIXME: condition not met??
+							$this->jsonRespond(422, [ // FIXME: 422 not sure
 								'status' => 'undefined',
 								'message' => 'Branch constraint not met',
 								'debug' => $hook_properties,
@@ -167,7 +167,7 @@ class PushyPlugin extends Plugin {
 							}
 
 						if(array_key_exists('committer', $conditions) && ($this->parsePayload($payload, 'committer') !== $conditions['committer'])) {
-							$this->jsonRespond(418, [ // FIXME: condition not met??
+							$this->jsonRespond(422, [ // FIXME: 422 not sure
 								'status' => 'undefined',
 								'message' => 'Committer constraint not met',
 								'debug' => $this->parsePayload($payload, 'committer'),
@@ -197,7 +197,12 @@ class PushyPlugin extends Plugin {
 				}
 			}
 
-			// TODO: fallback if execution reaches here to 404 ?? (it happens anyway I think)
+			// 404 fallback for endpoints under webhooks path, happens anyway I think but this sets useful JSON body
+			$this->jsonRespond(404, [
+				'status' => 'error',
+				'message' => 'Endpoint not found',
+				'debug' => $hook_properties,
+				]);
 
 		}
 	}

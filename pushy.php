@@ -119,20 +119,20 @@ class PushyPlugin extends Plugin {
 
 		if (strpos($this->grav['uri']->uri(), $webhooks['path']) === 0) { // is_null($page->route()) &&
 
-			if (strtoupper($_SERVER['REQUEST_METHOD']) != 'POST') {
-				$this->jsonRespond(405, [
-					'status' => 'error',
-					'message' => 'Only POST operations supported',
-					]);
-			}
-
-			if ($webhooks['secret'] ?? false) {
+			if ($webhooks['secret'] ?? FALSE) {
 				if (!$this->isWebhookAuthenticated($webhooks['secret'])) {
 					$this->jsonRespond(401, [
 						'status' => 'error',
 						'message' => 'Unauthorized request',
 						]);
 				}
+			}
+
+			if (strtoupper($_SERVER['REQUEST_METHOD']) != 'POST') {
+				$this->jsonRespond(405, [
+					'status' => 'error',
+					'message' => 'Only POST operations supported',
+					]);
 			}
 
 			// TODO: check for $this->grav['uri']->uri() == $webhooks['path'] here and provide a service catalogue??

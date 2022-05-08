@@ -114,10 +114,9 @@ class PushyPlugin extends Plugin {
 		if (!($webhooks['enabled'] ?? FALSE)) {
 			return;
 		}
-		$page = $this->grav['page'] ?? NULL; // CHECKME: may not need this
-		// dump($this->grav['uri']->uri(), is_null($page->route())); return;
+		$page = $this->grav['page'] ?? NULL;
 
-		if (strpos($this->grav['uri']->uri(), $webhooks['path']) === 0) { // is_null($page->route()) &&
+		if (strpos($this->grav['uri']->uri(), $webhooks['path']) === 0) {
 
 			if ($webhooks['secret'] ?? FALSE) {
 				if (!self::isWebhookAuthenticated($webhooks['secret'])) { // authentication fails
@@ -156,7 +155,7 @@ class PushyPlugin extends Plugin {
 						$this->jsonRespond(418, [
 							'status' => 'undefined',
 							'message' => 'Am teapot, no operation specified or performed',
-							'debug' => $hook_properties,
+							// 'debug' => $hook_properties,
 							]);
 					}
 
@@ -168,7 +167,7 @@ class PushyPlugin extends Plugin {
 						$this->jsonRespond(400, [
 							'status' => 'undefined',
 							'message' => 'No payload or invalid payload',
-							'debug' => $hook_properties,
+							// 'debug' => $hook_properties,
 							]);
 					}
 
@@ -181,7 +180,7 @@ class PushyPlugin extends Plugin {
 							$this->jsonRespond(422, [ // FIXME: 422 not sure
 								'status' => 'undefined',
 								'message' => 'Branch constraint not met',
-								'debug' => $hook_properties,
+								// 'debug' => $hook_properties,
 								]);
 							}
 
@@ -189,7 +188,7 @@ class PushyPlugin extends Plugin {
 							$this->jsonRespond(422, [ // FIXME: 422 not sure
 								'status' => 'undefined',
 								'message' => 'Committer constraint not met',
-								'debug' => $this->parsePayload($payload, 'committer'),
+								// 'debug' => $this->parsePayload($payload, 'committer'),
 								]);
 							}
 					}
@@ -203,7 +202,7 @@ class PushyPlugin extends Plugin {
 							$this->jsonRespond(200, [
 								'status' => 'success',
 								'message' => "Operation succeeded: '$action'",
-								'debug' => $hook_properties,
+								// 'debug' => $hook_properties,
 								]);
 						}
 					}
@@ -211,7 +210,7 @@ class PushyPlugin extends Plugin {
 						$this->jsonRespond(500, [
 							'status' => 'error',
 							'message' => "Operation failed: '$action' with \"{$e->getMessage()}\"",
-							'debug' => $hook_properties,
+							// 'debug' => $hook_properties,
 							]);
 					}
 				}

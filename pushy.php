@@ -152,7 +152,7 @@ class PushyPlugin extends Plugin {
 				if(strtolower($this->grav['uri']->uri()) ==  $endpoint) {
 
 					// check for declared hook response action
-					if (!array_key_exists('run', $hook_properties)) {
+					if (!$hook_properties || !array_key_exists('run', $hook_properties)) {
 						$this->jsonRespond(418, [
 							'status' => 'undefined',
 							'message' => 'Am teapot, no operation specified or performed',

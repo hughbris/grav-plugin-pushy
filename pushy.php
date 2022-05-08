@@ -128,6 +128,13 @@ class PushyPlugin extends Plugin {
 				}
 			}
 
+			if (strtoupper($_SERVER['REQUEST_METHOD']) != 'POST') {
+				$this->jsonRespond(405, [
+					'status' => 'error',
+					'message' => 'Only POST operations supported',
+					]);
+			}
+
 			$endpoints = $webhooks['endpoints'] ?? [];
 
 			// check if the request path is an exact match with the webhook root path
@@ -135,13 +142,6 @@ class PushyPlugin extends Plugin {
 				$this->jsonRespond(300, [
 					'status' => 'info',
 					'message' => ('Available endpoints are: ' . implode(', ', array_keys($endpoints))),
-					]);
-			}
-
-			if (strtoupper($_SERVER['REQUEST_METHOD']) != 'POST') {
-				$this->jsonRespond(405, [
-					'status' => 'error',
-					'message' => 'Only POST operations supported',
 					]);
 			}
 

@@ -128,7 +128,7 @@ class PushyPlugin extends Plugin {
 				}
 			}
 
-			$endpoints = $webhooks['endpoints'] ?: [];
+			$endpoints = $webhooks['endpoints'] ?? [];
 
 			// check if the request path is an exact match with the webhook root path
 			if($this->grav['uri']->uri() == $webhooks['path']) {
@@ -221,7 +221,7 @@ class PushyPlugin extends Plugin {
 			$this->jsonRespond(404, [
 				'status' => 'error',
 				'message' => 'Endpoint not found',
-				'debug' => $hook_properties,
+				// 'debug' => $webhooks,
 				]);
 
 		}

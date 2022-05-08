@@ -98,7 +98,7 @@ class PushyPlugin extends Plugin {
 	/**
 	 * Set any special variables for Twig templates
 	 */
-	public function setTwigSiteVariables($event): void {
+	public function setTwigSiteVariables(): void {
 		$publish_path = $this->config->get('plugins.admin.route') . DS . $this->admin_route;
 		$route = $this->grav['uri']->path();
 

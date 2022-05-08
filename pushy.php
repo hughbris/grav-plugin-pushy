@@ -120,7 +120,7 @@ class PushyPlugin extends Plugin {
 		if (strpos($this->grav['uri']->uri(), $webhooks['path']) === 0) { // is_null($page->route()) &&
 
 			if ($webhooks['secret'] ?? FALSE) {
-				if (!$this->isWebhookAuthenticated($webhooks['secret'])) {
+				if (!self::isWebhookAuthenticated($webhooks['secret'])) { // authentication fails
 					$this->jsonRespond(401, [
 						'status' => 'error',
 						'message' => 'Unauthorized request',
@@ -253,19 +253,19 @@ class PushyPlugin extends Plugin {
 	 * @return bool           whether or not the request is authorized
 	 */
 	// copied from GitSync base class method isRequestAuthorized()
-	public function isWebhookAuthenticated($secret): bool {
+	private static function isWebhookAuthenticated($secret): bool {
 		if (isset($_SERVER['HTTP_X_HUB_SIGNATURE'])) {
 			$payload = file_get_contents('php://input') ?: '';
 
-			return $this->isGithubSignatureValid($secret, $_SERVER['HTTP_X_HUB_SIGNATURE'], $payload);
+			return self::isGithubSignatureValid($secret, $_SERVER['HTTP_X_HUB_SIGNATURE'], $payload);
 		}
 
 		if (isset($_SERVER['HTTP_X_GITLAB_TOKEN'])) {
-			return $this->isGitlabTokenValid($secret, $_SERVER['HTTP_X_GITLAB_TOKEN']);
+			return self::isGitlabTokenValid($secret, $_SERVER['HTTP_X_GITLAB_TOKEN']);
 		}
 		else {
 			$payload = file_get_contents('php://input');
-			return $this->isGiteaSecretValid($secret, $payload);
+			return self::isGiteaSecretValid($secret, $payload);
 		}
 
 		return FALSE;
@@ -279,7 +279,7 @@ class PushyPlugin extends Plugin {
 	 * @return bool            whether the signature is valid or not
 	 */
 	// copied from GitSync base class method but uses more secure hash_equals()
-	private function isGithubSignatureValid($secret, $signatureHeader, $payload): bool {
+	private static function isGithubSignatureValid($secret, $signatureHeader, $payload): bool {
 		[$algorithm, $signature] = explode('=', $signatureHeader);
 
 		return hash_equals($signature, hash_hmac($algorithm, $payload, $secret));
@@ -293,7 +293,7 @@ class PushyPlugin extends Plugin {
 	 */
 	// copied from GitSync base class method but uses more secure hash_equals()
 	// TODO: untested
-	private function isGitlabTokenValid($secret, $token): bool {
+	private static function isGitlabTokenValid($secret, $token): bool {
 		return hash_equals($secret === $token);
 	}
 
@@ -305,7 +305,7 @@ class PushyPlugin extends Plugin {
 	 */
 	// copied from GitSync base class method but uses more secure hash_equals()
 	// TODO: untested
-	private function isGiteaSecretValid($secret, $payload): bool {
+	private static function isGiteaSecretValid($secret, $payload): bool {
 		$payload = json_decode($payload, TRUE);
 		if (!empty($payload) && isset($payload['secret'])) {
 			return hash_equals($secret, $payload['secret']);

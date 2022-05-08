@@ -195,21 +195,22 @@ class PushyPlugin extends Plugin {
 					}
 
 					try {
-						// TODO: perform the named scheduled task
+						// perform the named scheduled task
+						$action = $hook_properties['run'];
+						$result = self::triggerSchedulerJob($action);
 
-						$this->jsonRespond(200, [
-							'status' => 'success',
-							'message' => 'Operation succeeded',
-							'debug' => $hook_properties,
-							// 'payload' => $payload,
-							'branch' => $this->parsePayload($payload, 'branch'),
-							'jbranch' => $payload->ref,
-							]);
+						if($result) {
+							$this->jsonRespond(200, [
+								'status' => 'success',
+								'message' => "Operation succeeded: '$action'",
+								'debug' => $hook_properties,
+								]);
+						}
 					}
 					catch (\Exception $e) {
 						$this->jsonRespond(500, [
 							'status' => 'error',
-							'message' => 'Operation failed',
+							'message' => "Operation failed: '$action' with \"{$e->getMessage()}\"",
 							'debug' => $hook_properties,
 							]);
 					}
@@ -224,6 +225,26 @@ class PushyPlugin extends Plugin {
 				]);
 
 		}
+	}
+
+	/**
+	 * Perform a Grav Scheduler task, specified by name
+	 * @param  string $job_name The name (ID) of the task to run
+	 * @return bool             true if the job was found and ran successfully, otherwise throws \Exception
+	 */
+	private static function triggerSchedulerJob($job_name): bool {
+		$scheduler = new \Grav\Common\Scheduler\Scheduler();
+		$job = $scheduler->getJob($job_name);
+		if ($job) {
+			$job->inForeground()->run();
+			if(!$job->isSuccessful()) { // was unsuccessful
+				throw new \Exception($job->getOutput());
+			}
+		}
+		else {
+			throw new \Exception("job not defined");
+		}
+		return TRUE;
 	}
 
 	/**

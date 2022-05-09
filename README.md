@@ -100,21 +100,20 @@ There are lots of moving parts in this pipeline and it pays to set them up and t
 > Back up your user folder.
 > This will give you an option to recover your work if anything goes wrong. Nothing major _should_ go wrong here, but it's better to have peace of mind. **You have been warned.**
 
-Goal | Discussion | Testing
------|------------|--------
-
-Local repository is set up correctly.
+| Goal | Discussion | Testing |
+|------|------------|---------|
+|Local repository is set up correctly.
 | Make sure your Git repository is initialised in your `user` folder.
 | Test this by checking the Git repository status with your Git client (`git status` or using a front end).
-
-You are logged into Admin with sufficient permissions.
+|
+| You are logged into Admin with sufficient permissions.
 | A group permission to allow publishing access is high on the TODO list. For now, log in as a super user.
 | Refresh any Admin page and see if "Publishing" or "Publish" comes up in the side menu.
-
-The plugin's Git library is installed.
-If you didn't do this when you installed this plugin, refer to note under [Installation](#Installation).
-Refreshing any Admin page and confirm that "Publish" comes up in the side menu.
-
+|
+| The plugin's Git library is installed.
+| If you didn't do this when you installed this plugin, refer to note under [Installation](#Installation).
+| Refreshing any Admin page and confirm that "Publish" comes up in the side menu.
+|
 Folders are visibly monitoring for changes.
 In your plugin configuration, set the folder(s) to consider. For experimentation, you might start with something very specific, like a single page path you intend to edit. In normal operation, you probably want `pages` and maybe some others. See also [Configuration](#Configuration).
 Make a small change within a path that is listed in `folders`.

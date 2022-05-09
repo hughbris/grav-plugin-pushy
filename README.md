@@ -97,16 +97,19 @@ Your Grav Git repository is assumed to be under your `user` directory. Here is t
 
 There are lots of moving parts in this pipeline and it pays to set them up and test them methodically, both in isolation and together. You need to geta lot of ducks in a row.
 
-Back up your user folder.
-This will give you an option to recover your work if anything goes wrong. Nothing major _should_ go wrong here, but it's better to have peace of mind. **You have been warned.**
+> Back up your user folder.
+> This will give you an option to recover your work if anything goes wrong. Nothing major _should_ go wrong here, but it's better to have peace of mind. **You have been warned.**
+
+Goal | Discussion | Testing
+-----|------------|--------
 
 Local repository is set up correctly.
-Make sure your Git repository is initialised in your `user` folder.
-Test this by checking the Git repository status with your Git client (`git status` or using a front end).
+| Make sure your Git repository is initialised in your `user` folder.
+| Test this by checking the Git repository status with your Git client (`git status` or using a front end).
 
 You are logged into Admin with sufficient permissions.
-A group permission to allow publishing access is high on the TODO list. For now, log in as a super user.
-Refresh any Admin page and see if "Publishing" or "Publish" comes up in the side menu.
+| A group permission to allow publishing access is high on the TODO list. For now, log in as a super user.
+| Refresh any Admin page and see if "Publishing" or "Publish" comes up in the side menu.
 
 The plugin's Git library is installed.
 If you didn't do this when you installed this plugin, refer to note under [Installation](#Installation).

@@ -98,44 +98,26 @@ Your Grav Git repository is assumed to be under your `user` directory. Here is t
 There are lots of moving parts in this pipeline and it pays to set them up and test them methodically, both in isolation and together. You need to geta lot of ducks in a row.
 
 > Back up your user folder.
+
 > This will give you an option to recover your work if anything goes wrong. Nothing major _should_ go wrong here, but it's better to have peace of mind. **You have been warned.**
 
-Goal | Discussion | Testing
------|------------|--------
-Local repository is set up correctly.| Make sure your Git repository is initialised in your `user` folder.| Test this by checking the Git repository status with your Git client (`git status` or using a front end).
-You are logged into Admin with sufficient permissions.| A group permission to allow publishing access is high on the TODO list. For now, log in as a super user.| Refresh any Admin page and see if "Publishing" or "Publish" comes up in the side menu.
-The plugin's Git library is installed.| If you didn't do this when you installed this plugin, refer to note under [Installation](#Installation).| Refreshing any Admin page and confirm that "Publish" comes up in the side menu.
-
-Folders are visibly monitoring for changes.
-In your plugin configuration, set the folder(s) to consider. For experimentation, you might start with something very specific, like a single page path you intend to edit. In normal operation, you probably want `pages` and maybe some others. See also [Configuration](#Configuration).
-Make a small change within a path that is listed in `folders`.
-Go to "Publish" in the Admin menu and make sure your change is shown. _Note that your change is not staged or committed at this stage, so you could easily revert your test change using Git if you want to._
-
-Changes commit correctly.
-Skip this step if the previous ones have been successful and you are "feeling lucky™". It's really a consolidation. Check out a new Git branch if you want to revert this easily. Add a commit message/description and press the "Publish" button below your changes in Admin.
-Check that no errors show. Now check your Git log for a correct entry.
-
-_E_ is connected to your `origin` remote repository.
-In Git, if your repository isn't yet been connected to `origin`, add it using `git remote add origin <URL>` or using a Git front end.
-Test this by running a `git fetch` (or equivalent) and looking for errors.
-
-Grav can access a private repository without being prompted for a password.
-In a real world authoring/publishing worflow, you will almost certainly want to keep your remote repository private. So it's good to test that you can push to a remote private repository without password prompts, from within the plugin. Importantly, make sure you test your remote connection as the same user that Grav runs as in your webserver. In some setups, that won't be possible because the webserver user has no ability to log in. If you are running Grav in a Docker container (or maybe a similar isolated environment), you may need to [set up an SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) or (perhaps more simply) or use a [Personal Access Token (PAT)](https://github.com/settings/tokens) in your remote URL (e.g. https://<TOKEN>@github.com/<USER>/<REPO>.git).
-Run `git fetch` as the Grav webserver user on a remote private repository. Make sure you weren't prompted for more input and that no error messages showed.
-
-Commits on _E_ trigger a push to `origin`.
-We will set up a post-commit hook on _E_. Create a new file called `post-commit` under `.git/hooks/` with a single line: `git push origin <BRANCHNAME>`. This will be triggered when commits are made. **Make sure you make this file executable** by the webserver user. _You can remove or rename this file or make it non-executable if you want to pause your commit trigger._
-Try committing through your Git interface first if you like. See if it pushes. Then you'll have to set up more small changes to test, repeating some steps above. Now set up a test edit and 'Publish' through Admin (as described above) and check that your changes were pushed to your remote `origin`.
-
-On your target platform, Grav's webserver user can run a script.
-Moving to the remote target (publication) server _R_ now, let's write a trivial batch script. We aim to show that the webserver user can run scripts. If your webserver user doesn't have shell capabilities, you'll need to skip this. _If you are able_, switch or start a shell session as the user Grav runs as on the webserver. Create a new test file `.git/hooks/test-ops.sh` <!-- FIXME -->containing:
+| Goal | Details | Testing |
+|------|---------|---------|
+| Local repository is set up correctly.| Make sure your Git repository is initialised in your `user` folder.| Test this by checking the Git repository status with your Git client (`git status` or using a front end).|
+| You are logged into Admin with sufficient permissions.| A group permission to allow publishing access is high on the TODO list. For now, log in as a super user.| Refresh any Admin page and see if "Publishing" or "Publish" comes up in the side menu.|
+| The plugin's Git library is installed.| If you didn't do this when you installed this plugin, refer to note under [Installation](#Installation).| Refreshing any Admin page and confirm that "Publish" comes up in the side menu.|
+| Folders are visibly monitoring for changes.| In your plugin configuration, set the folder(s) to consider. For experimentation, you might start with something very specific, like a single page path you intend to edit. In normal operation, you probably want `pages` and maybe some others. See also [Configuration](#Configuration). | Make a small change within a path that is listed in `folders`. Go to "Publish" in the Admin menu and make sure your change is shown. _Note that your change is not staged or committed at this stage, so you could easily revert your test change using Git if you want to._|
+| Changes commit correctly.| Skip this step if the previous ones have been successful and you are "feeling lucky™". It's really a consolidation. Check out a new Git branch if you want to revert this easily. Add a commit message/description and press the "Publish" button below your changes in Admin.| Check that no errors show. Now check your Git log for a correct entry.|
+| _E_ is connected to your `origin` remote repository.| In Git, if your repository isn't yet been connected to `origin`, add it using `git remote add origin <URL>` or using a Git front end.| Test this by running a `git fetch` (or equivalent) and looking for errors.|
+| Grav can access a private repository without being prompted for a password.| In a real world authoring/publishing worflow, you will almost certainly want to keep your remote repository private. So it's good to test that you can push to a remote private repository without password prompts, from within the plugin. Importantly, make sure you test your remote connection as the same user that Grav runs as in your webserver. In some setups, that won't be possible because the webserver user has no ability to log in. If you are running Grav in a Docker container (or maybe a similar isolated environment), you may need to [set up an SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) or (perhaps more simply) or use a [Personal Access Token (PAT)](https://github.com/settings/tokens) in your remote URL (e.g. https://<TOKEN>@github.com/<USER>/<REPO>.git).| Run `git fetch` as the Grav webserver user on a remote private repository. Make sure you weren't prompted for more input and that no error messages showed.|
+| Commits on _E_ trigger a push to `origin`.| We will set up a post-commit hook on _E_. Create a new file called `post-commit` under `.git/hooks/` with a single line: `git push origin <BRANCHNAME>`. This will be triggered when commits are made. **Make sure you make this file executable** by the webserver user. _You can remove or rename this file or make it non-executable if you want to pause your commit trigger._| Try committing through your Git interface first if you like. See if it pushes. Then you'll have to set up more small changes to test, repeating some steps above. Now set up a test edit and 'Publish' through Admin (as described above) and check that your changes were pushed to your remote `origin`.|
+| On your target platform, Grav's webserver user can run a script.| Moving to the remote target (publication) server _R_ now, let's write a trivial batch script. We aim to show that the webserver user can run scripts. If your webserver user doesn't have shell capabilities, you'll need to skip this. _If you are able_, switch or start a shell session as the user Grav runs as on the webserver. Create a new test file `.git/hooks/test-ops.sh` <!-- FIXME -->containing:
 
 ```sh
 cd /var/www/grav/user
 ls -la
 ```
-If the path to your Grav `user` directory differs, adapt the `cd` line. Now set the file as executable.
-From the `user` folder, as the webserver user, at the command prompt enter `.git/hooks/test-ops.sh`. You should see a detailed list of files in `user` with no error messages.
+If the path to your Grav `user` directory differs, adapt the `cd` line. Now set the file as executable.| From the `user` folder, as the webserver user, at the command prompt enter `.git/hooks/test-ops.sh`. You should see a detailed list of files in `user` with no error messages.|
 
 On your target platform, Grav can pull and merge from the private repository without any password prompts.
 Let's edit your batch script on _R_. We'll check that Grav's webserver user can run a merge, or whatever is required, which accesses the private repository, and can do that without any password prompts. _If you are able_, switch or start a shell session as the user Grav runs as on the webserver. We could just test this with a single shell command, but let's edit our test file `.git/hooks/test-ops.sh` <!-- FIXME -->instead:

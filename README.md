@@ -126,17 +126,17 @@ There are lots of moving parts in this pipeline and it pays to set them up and t
 Check that no errors show. Now check your Git log for a correct entry.
 
 #### _E_ is connected to your `origin` remote repository
-🦆 In Git, if your repository isn't yet been connected to `origin`, add it using `git remote add origin <URL>` or using a Git front end.
+🦆 In Git, if your repository isn't yet been connected to `origin`, add it using `git remote add origin &lt;URL>` or using a Git front end.
 
 ✔ Test this by running a `git fetch` (or equivalent) and looking for errors.
 
 #### Grav can access a private repository without being prompted for a password
-🦆 In a real world authoring/publishing worflow, you will almost certainly want to keep your remote repository private. So it's good to test that you can push to a remote private repository without password prompts, from within the plugin. Importantly, make sure you test your remote connection as the same user that Grav runs as in your webserver. In some setups, that won't be possible because the webserver user has no ability to log in. If you are running Grav in a Docker container (or maybe a similar isolated environment), you may need to [set up an SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) or (perhaps more simply) or use a [Personal Access Token (PAT)](https://github.com/settings/tokens) in your remote URL (e.g. https://<TOKEN>@github.com/<USER>/<REPO>.git).
+🦆 In a real world authoring/publishing worflow, you will almost certainly want to keep your remote repository private. So it's good to test that you can push to a remote private repository without password prompts, from within the plugin. Importantly, make sure you test your remote connection as the same user that Grav runs as in your webserver. In some setups, that won't be possible because the webserver user has no ability to log in. If you are running Grav in a Docker container (or maybe a similar isolated environment), you may need to [set up an SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) or (perhaps more simply) or use a [Personal Access Token (PAT)](https://github.com/settings/tokens) in your remote URL (e.g. https://&lt;TOKEN>@github.com/&lt;USER>/&lt;REPO>.git).
 
 ✔ Run `git fetch` as the Grav webserver user on a remote private repository. Make sure you weren't prompted for more input and that no error messages showed.|
 
 #### Commits on _E_ trigger a push to `origin`
-🦆 We will set up a post-commit hook on _E_. Create a new file called `post-commit` under `.git/hooks/` with a single line: `git push origin <BRANCHNAME>`. This will be triggered when commits are made. **Make sure you make this file executable** by the webserver user. _You can remove or rename this file or make it non-executable if you want to pause your commit trigger._
+🦆 We will set up a post-commit hook on _E_. Create a new file called `post-commit` under `.git/hooks/` with a single line: `git push origin &lt;BRANCHNAME>`. This will be triggered when commits are made. **Make sure you make this file executable** by the webserver user. _You can remove or rename this file or make it non-executable if you want to pause your commit trigger._
 
 ✔ Try committing through your Git interface first if you like. See if it pushes. Then you'll have to set up more small changes to test, repeating some steps above. Now set up a test edit and 'Publish' through Admin (as described above) and check that your changes were pushed to your remote `origin`.|
 
@@ -163,7 +163,7 @@ Change `fetch` to a bolder operation that requires private access if you feel it
 ✔ From the `user` folder, as the webserver user, at the command prompt enter `.git/hooks/test-ops.sh`. You should see only happy messages or nothing at all.
 
 #### A dormant custom Grav job is set up on _R_
-🦆 Now we'll set up a test [custom job](https://learn.getgrav.org/17/advanced/scheduler#custom-jobs) in Grav running our test batch script. As a custom job, it's easy to trigger from Grav. You only want to define this job in Grav's scheduler for the _R_ environment, which means you need to edit or create the file at `user/env/<SERVER_HOSTNAME>/config/scheduler.yaml`. Add this test custom job:
+🦆 Now we'll set up a test [custom job](https://learn.getgrav.org/17/advanced/scheduler#custom-jobs) in Grav running our test batch script. As a custom job, it's easy to trigger from Grav. You only want to define this job in Grav's scheduler for the _R_ environment, which means you need to edit or create the file at `user/env/&lt;SERVER_HOSTNAME>/config/scheduler.yaml`. Add this test custom job:
 
 ```yaml
 status:
@@ -176,10 +176,11 @@ custom_jobs:
     output_mode: overwrite
 ```
 You may need to adjust some of those file paths for your server setup. This custom job is defined with two precautions against being automatically run: it is disabled, and it only triggers on the 31st February (never).
+
 ✔ You may be able to test initiating this job as the Grav user by triggering it at the command line using `bin/grav scheduler -r test-job`, but I was not able to see my custom job for some reason. However, it did run when triggered at the next test step (webhooks). You can see that the job was triggered by checking its specified `output` file location.
 
 #### _R_ responds to webhooks requests
-🦆 If the plugin is working correctly and webhooks are enabled, Grav should povide responses at certain endpoints defined in the plugin's configuration. Like your test custom job, you'll only want to define this job in Grav's scheduler for the _R_ environment. So edit or create this file at `user/env/<SERVER_HOSTNAME>/config/plugins/pushy.yaml`. Add this:
+🦆 If the plugin is working correctly and webhooks are enabled, Grav should povide responses at certain endpoints defined in the plugin's configuration. Like your test custom job, you'll only want to define this job in Grav's scheduler for the _R_ environment. So edit or create this file at `user/env/&lt;SERVER_HOSTNAME>/config/plugins/pushy.yaml`. Add this:
 
 ```yaml
 webhooks:
@@ -191,7 +192,7 @@ webhooks:
       run: test-job
 ```
 
-✔ Test the webhook you defined by sending POST requests to https://<your-server>/_webhooks/publish. If you don't have an easy way to do this, you can test it in the next step too. Here are some test requests and expected responses using curl:
+✔ Test the webhook you defined by sending POST requests to https://&lt;your-server>/_webhooks/publish. If you don't have an easy way to do this, you can test it in the next step too. Here are some test requests and expected responses using curl:
 
 ```shell
 $ curl -I https://<your-server>/_webhooks/publish # expected response: 405 Method Not Allowed
@@ -202,7 +203,8 @@ $ curl -I https://<your-server>/_webhooks/broken -X POST # expected response: 40
 We'll test for successful requests and add more complexity in the next step. We'd need to make up a smaple commit summary payload if we were to test this here, and it's much easier to just do it for real.
 
 #### Origin responds to pushes from _E_ by sending webhook requests to _R_
-🦆 We now need to put the key piece in the middle of this pipeline. These instructions only apply to Github, other providers will presumably have similar setups. In your private repository settings on the Github web interface, select 'Webhooks' on the menu. Now 'Add webhook' (a button). Enter your Payload URL as https://<your-server>/_webhooks/publish, which we hopefully tested as responsive in the last step. Content Type should be `content/json`. You don't need to set a secret yet (??)<!-- CHECKME -->. Set 'Enable SSL verification', 'Just the push event', and set it active. Save it.
+🦆 We now need to put the key piece in the middle of this pipeline. These instructions only apply to Github, other providers will presumably have similar setups. In your private repository settings on the Github web interface, select 'Webhooks' on the menu. Now 'Add webhook' (a button). Enter your Payload URL as https://&lt;your-server>/_webhooks/publish, which we hopefully tested as responsive in the last step. Content Type should be `content/json`. You don't need to set a secret yet (??)<!-- CHECKME -->. Set 'Enable SSL verification', 'Just the push event', and set it active. Save it.
+
 ✔ Now we're testing this by going to _E_. Initiate a change in your repository and push it. You don't need to do this through the Admin or this plugin. You don't need to commit within the folders you set up if you do this outside Admin.
 Now check back on the Github website that your webhook is there. When you open it, you should see a 'Recent Deliveries' tab there. You may need to refresh.
 Have a look at the response you got. From Github, it's straightforward to simply resend the same webhook to _R_ if you want to play with settings.

@@ -1,18 +1,14 @@
 enabled: true
-folders:
-  # - pages
-  # - themes/gravory # for tests
-  - pages/40.recipes/106.holocene-porridge
-# git:
-#   bin: 
-logging: true
+folders: # which folders under Grav's user folder do you want to check for changes?
+  - pages # typically, this default will be fine but you can provide more specific paths and add as many as you like
+logging: true # record Git and plugin actions in Grav's log
 webhooks:
-  enabled: true
-  path: /_webhooks
-  # secret: 
-  endpoints:
-    'publish':
-      # run: 
-      conditions:
-        # branch: 
-        # committer: 
+  enabled: false # whether we serve and respond to webhooks
+  path: /_webhooks # the base path of the webhooks
+  # secret: # the webhook secret - DANGER, will serve without authentication if not set
+  # endpoints: # which endpoints we respond to
+    # publish: # example value, would be served at /_webhooks/publish
+      # run: # run this custom job when valid requests are received
+      # conditions: # optionally add some conditions on when to trigger the custom job
+        # branch: # only on this branch of the commit
+        # committer: # email of the git committer

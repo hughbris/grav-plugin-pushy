@@ -241,9 +241,9 @@ class PushyPlugin extends Plugin {
 			}
 		}
 		else {
-			throw new \Exception("job not defined");
+			throw new \Exception('job not defined');
 		}
-		return TRUE;
+		return TRUE; // FIXME: return the job instead, since we can then access its properties and methods from the caller
 	}
 
 	/**

@@ -4,7 +4,7 @@ The **Pushy** Plugin is an extension for [Grav CMS](https://github.com/getgrav/g
 
 Publish ("push") changes to your production environment from your editing (or development or other) environment Admin dashboard.
 
-This plugin uses Git and is heavily inspired by the [GitSync plugin](https://github.com/trilbymedia/grav-plugin-git-sync). Unlike GitSync, however, there is a lot more manual setup by the developer, less (IMHO) scary magic, and more control.
+This plugin uses Git and is heavily inspired by the [GitSync plugin](https://github.com/trilbymedia/grav-plugin-git-sync). Unlike GitSync, however, there is a lot more manual setup by the developer, less (IMHO) scary magic, and more control. It will never do anything automatically that you haven't set up.
 
 <!-- TODO: feature comparson table -->
 
@@ -224,4 +224,5 @@ Optionally add a webhook secret and some conditions after a successful test. You
 - [ ] Use Github's webhook API to test the response from invoking server webhooks, then notify user
 - [ ] Break this README out into smaller docs, it's going to get too involved
 - [ ] Find a good, safe location to recommend placing the executable merge (etc) scripts for on-demand invocation by Grav scheduler
+- [ ] Fix: there are duplicated static methods already (auth in main class and GitUtils)
 - [ ] Break these items out into proper GH issues

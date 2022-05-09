@@ -217,8 +217,8 @@ Optionally add a webhook secret and some conditions after a successful test. You
 - [ ] Add an authorisation permission to publish
 - [ ] Provide a "wizard" to generate githook code that can be copied, with instructions
 - [ ] Potentially move the webhooks to a separate plugin
-- [ ] Route and respond to webhooks
-- [ ] Perhaps allow webhook URLs to map to _(non-)_ scheduled tasks to be triggered in response
+- [x] Route and respond to webhooks
+- [x] Perhaps allow webhook URLs to map to _(non-)_ scheduled tasks to be triggered in response
 - [ ] CLI, including local webhook creation and remote webhook creation using the Github (etc.) API
 - [ ] Add on-screen instructions for installing Git PHP library using composer if not installed
 - [ ] Use Github's webhook API to test the response from invoking server webhooks, then notify user

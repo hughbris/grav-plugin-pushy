@@ -57,6 +57,8 @@ Here is the default configuration and an explanation of available options:
 
 ```yaml
 enabled: true
+# git:
+  # bin: # optional filesystem path to git executable, use this only if git is not in your execution path
 folders: # which folders under Grav's user folder do you want to check for changes?
   - pages # typically, this default will be fine but you can provide more specific paths and add as many as you like
 logging: true # record Git and plugin actions in Grav's log

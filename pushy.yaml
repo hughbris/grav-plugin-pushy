@@ -1,12 +1,14 @@
 enabled: true
+# git:
+  # bin: # optional filesystem path to git executable, only use this if git isn't in your execution path
 folders: # which folders under Grav's user folder do you want to check for changes?
   - pages # typically, this default will be fine but you can provide more specific paths and add as many as you like
 logging: true # record Git and plugin actions in Grav's log
 webhooks:
   enabled: false # whether we serve and respond to webhooks
   path: /_webhooks # the base path of the webhooks
-  # secret: # the webhook secret - DANGER, will serve without authentication if not set
-  # endpoints: # which endpoints we respond to
+  # secret: # the webhook secret - DANGER, will serve without authentication if not set - FIXME: move this into each endpoint, maybe this can stay at top level as a catchall
+  # endpoints: # which endpoints we respond to - FIXME: use an aray for children because varying property names cannot be encoded into blueprints
     # publish: # example value, would be served at /_webhooks/publish
       # run: # run this custom job when valid requests are received
       # conditions: # optionally add some conditions on when to trigger the custom job

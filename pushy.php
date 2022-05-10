@@ -270,6 +270,7 @@ class PushyPlugin extends Plugin
 		return TRUE; // FIXME: return the job instead, since we can then access its properties and methods from the caller
 	}
 
+	// TODO: move these into GitUtils I think ..
 	/**
 	 * Returns true if the request contains a valid signature or token
 	 * @param  string $secret local secret
@@ -339,6 +340,7 @@ class PushyPlugin extends Plugin
 		return FALSE;
 	}
 
+	// TODO: this can be static
 	/**
 	 * Provide a HTTP status and JSON response and exit
 	 * @param  int    $http_status   HTTP status number to return
@@ -353,6 +355,7 @@ class PushyPlugin extends Plugin
 		exit;
 	}
 
+	// TODO: this can be static
 	/**
 	 * Parse JSON payloads and extract key properties
 	 * @param  object $payload       JSON-decoded payload string

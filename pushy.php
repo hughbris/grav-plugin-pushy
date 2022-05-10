@@ -102,7 +102,10 @@ class PushyPlugin extends Plugin {
 		$publish_path = $this->config->get('plugins.admin.route') . DS . $this->admin_route;
 		$route = $this->grav['uri']->path();
 
-		if ($route == $publish_path) {
+		$isInitialized = GitUtils::isGitInitialized();
+		// TODO: test for GitUtils::isGitInstalled() - make a wrapper for these two funcs since we're checking them twice now
+
+		if ($isInitialized && $route == $publish_path) {
 			$twig = $this->grav['twig'];
 			$twig->twig_vars['git_index'] = $this->repo->statusSelect(); # TRUE, $env='index', $select='MTDRCA');
 		}

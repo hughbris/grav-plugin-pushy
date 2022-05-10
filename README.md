@@ -110,10 +110,14 @@ There are lots of moving parts in this pipeline and it pays to set them up and t
 
 ✔ Refresh any Admin page and see if "Publishing" or "Publish" comes up in the side menu.
 
+![Admin's Publishing menu item](docs/publishing-menu-item-screenshot.png)
+
 #### The plugin's Git library is installed
 🦆 If you didn't do this when you installed this plugin, refer to note under [Installation](#Installation).
 
 ✔ Refreshing any Admin page and confirm that "Publish" comes up in the side menu.
+
+![Admin's Publish menu item](docs/publish-menu-item-screenshot.png)
 
 #### Folders are visibly monitoring for changes
 🦆 In your plugin configuration, set the folder(s) to consider. For experimentation, you might start with something very specific, like a single page path you intend to edit. In normal operation, you probably want `pages` and maybe some others. See also [Configuration](#Configuration).
@@ -123,7 +127,7 @@ There are lots of moving parts in this pipeline and it pays to set them up and t
 #### Changes commit correctly
 🦆 Skip this step if the previous ones have been successful and you are "feeling lucky™". It's really a consolidation. Check out a new Git branch if you want to revert this easily. Add a commit message/description and press the "Publish" button below your changes in Admin.
 
-Check that no errors show. Now check your Git log for a correct entry.
+✔ Check that no errors show. Now check your Git log for a correct entry.
 
 #### _E_ is connected to your `origin` remote repository
 🦆 In Git, if your repository isn't yet been connected to `origin`, add it using `git remote add origin &lt;URL>` or using a Git front end.
@@ -131,14 +135,16 @@ Check that no errors show. Now check your Git log for a correct entry.
 ✔ Test this by running a `git fetch` (or equivalent) and looking for errors.
 
 #### Grav can access a private repository without being prompted for a password
-🦆 In a real world authoring/publishing worflow, you will almost certainly want to keep your remote repository private. So it's good to test that you can push to a remote private repository without password prompts, from within the plugin. Importantly, make sure you test your remote connection as the same user that Grav runs as in your webserver. In some setups, that won't be possible because the webserver user has no ability to log in. If you are running Grav in a Docker container (or maybe a similar isolated environment), you may need to [set up an SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) or (perhaps more simply) or use a [Personal Access Token (PAT)](https://github.com/settings/tokens) in your remote URL (e.g. https://&lt;TOKEN>@github.com/&lt;USER>/&lt;REPO>.git).
+🦆 In a real world authoring/publishing worflow, you will almost certainly want to keep your remote repository private. So it's good to test that you can push to a remote private repository without password prompts, from within the plugin. Importantly, make sure you test your remote connection as the same user that Grav runs as in your webserver. In some setups, that won't be possible because the webserver user has no ability to log in.
+
+> If you are running Grav in a Docker container (or maybe a similar isolated environment), you may need to [set up an SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) or (perhaps more simply) or use a [Personal Access Token (PAT)](https://github.com/settings/tokens) in your remote URL (e.g. https://&lt;TOKEN>@github.com/&lt;USER>/&lt;REPO>.git).
 
 ✔ Run `git fetch` as the Grav webserver user on a remote private repository. Make sure you weren't prompted for more input and that no error messages showed.|
 
 #### Commits on _E_ trigger a push to `origin`
 🦆 We will set up a post-commit hook on _E_. Create a new file called `post-commit` under `.git/hooks/` with a single line: `git push origin &lt;BRANCHNAME>`. This will be triggered when commits are made. **Make sure you make this file executable** by the webserver user. _You can remove or rename this file or make it non-executable if you want to pause your commit trigger._
 
-✔ Try committing through your Git interface first if you like. See if it pushes. Then you'll have to set up more small changes to test, repeating some steps above. Now set up a test edit and 'Publish' through Admin (as described above) and check that your changes were pushed to your remote `origin`.|
+✔ Try committing through your Git client first if you like. See if it pushes. Then you'll have to set up more small changes to test, repeating some steps above. Now set up a test edit and 'Publish' through Admin (as described above) and check that your changes were pushed to your remote `origin`.
 
 #### On your target platform, Grav's webserver user can run a script
 🦆 Moving to the remote target (publication) server _R_ now, let's write a trivial batch script. We aim to show that the webserver user can run scripts. If your webserver user doesn't have shell capabilities, you'll need to skip this. _If you are able_, switch or start a shell session as the user Grav runs as on the webserver. Create a new test file `.git/hooks/test-ops.sh` <!-- FIXME -->containing:
@@ -203,12 +209,25 @@ $ curl -I https://<your-server>/_webhooks/broken -X POST # expected response: 40
 We'll test for successful requests and add more complexity in the next step. We'd need to make up a smaple commit summary payload if we were to test this here, and it's much easier to just do it for real.
 
 #### Origin responds to pushes from _E_ by sending webhook requests to _R_
-🦆 We now need to put the key piece in the middle of this pipeline. These instructions only apply to Github, other providers will presumably have similar setups. In your private repository settings on the Github web interface, select 'Webhooks' on the menu. Now 'Add webhook' (a button). Enter your Payload URL as https://&lt;your-server>/_webhooks/publish, which we hopefully tested as responsive in the last step. Content Type should be `content/json`. You don't need to set a secret yet (??)<!-- CHECKME -->. Set 'Enable SSL verification', 'Just the push event', and set it active. Save it.
+🦆 We now need to put the key piece in the middle of this pipeline. _These instructions only apply to Github, other providers will presumably have similar setup steps._
+
+In your private repository's 'Settings' on the Github web interface, select 'Webhooks' on the menu. Now 'Add webhook' (a button). Enter your Payload URL as https://&lt;your-server>/_webhooks/publish, which we hopefully tested as responsive in the last step. Content Type should be `content/json`. You don't need to set a secret yet (??)<!-- CHECKME -->. Set 'Enable SSL verification', 'Just the push event', and set it active. Save it.
+
+![Github's repository Webhooks button in its UI](docs/github-menu-webhooks.png)
 
 ✔ Now we're testing this by going to _E_. Initiate a change in your repository and push it. You don't need to do this through the Admin or this plugin. You don't need to commit within the folders you set up if you do this outside Admin.
-Now check back on the Github website that your webhook is there. When you open it, you should see a 'Recent Deliveries' tab there. You may need to refresh.
-Have a look at the response you got. From Github, it's straightforward to simply resend the same webhook to _R_ if you want to play with settings.
-Also check for evidence on _R_ that the test job executed, by looking at the configured job output file.
+
+✔ Now check back on the Github website that your webhook is there. When you open it, you should see a 'Recent Deliveries' tab there. You may need to refresh.
+Have a look at the response you got.
+
+![Github's Recent Deliveries webhook tab in its UI](docs/github-webhook-activities.png)
+
+From Github, it's straightforward to simply resend the same webhook to _R_ if you want to play with settings.
+
+![Github's Redeliver webhook button in its UI](docs/github-webhook-redeliver.png)
+
+✔ Also check for evidence on _R_ that the test job executed, by looking at the job output file you configured.
+
 Optionally add a webhook secret and some conditions after a successful test. You'd have to configure test conditions on _R_. See [Configuration](#Configuration) above.
 
 > If you made it this far, and especially got successful requests from pushes on _E_, congratulations! You can now set this up with your desired real world publishing workflow actions.

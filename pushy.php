@@ -4,6 +4,7 @@ namespace Grav\Plugin;
 use Composer\Autoload\ClassLoader;
 use Grav\Common\Plugin;
 use Grav\Common\Page\Page;
+use Grav\Plugin\Pushy\RequestHandler;
 use RocketTheme\Toolbox\Event\Event;
 use Grav\Plugin\Pushy\PushyRepo;
 use Grav\Plugin\Pushy\GitUtils;
@@ -53,10 +54,20 @@ class PushyPlugin extends Plugin {
 		$this->init();
 
 		if ($this->isAdmin()) {
+			/** @var RequestHandler */
+			$requestHandler = new RequestHandler();
+			$response = $requestHandler->handleRequest();
+
+			if ($response) {
+				echo json_encode($response);
+				die();
+			}
+			
 			$this->enable([
 				'onAdminTwigTemplatePaths'  => ['setAdminTwigTemplatePaths', 0],
 				'onAdminMenu' => ['showPublishingMenu', 0],
 				'onTwigSiteVariables' => ['setTwigSiteVariables', 0],
+				'onAssetsInitialized' => ['onAssetsInitialized', 0],
 				]);
 		}
 
@@ -296,7 +307,7 @@ class PushyPlugin extends Plugin {
 	// copied from GitSync base class method but uses more secure hash_equals()
 	// TODO: untested
 	private static function isGitlabTokenValid($secret, $token): bool {
-		return hash_equals($secret === $token);
+		return hash_equals($secret, $token);
 	}
 
 	/**
@@ -347,6 +358,17 @@ class PushyPlugin extends Plugin {
 		}
 		// fallback
 		return NULL;
+	}
+
+	public function onAssetsInitialized() {
+		/** @var Assets */
+		$assets = $this->grav['assets'];
+
+		// Add script for all Admin pages. Must at least check on which page user is.
+
+		/** @psalm-suppress TooManyArguments */
+		$assets->addJs("plugin://pushy/js/pushy-admin.js", ['type' => 'module']);
+		$assets->addCss("plugin://pushy/css/pushy-admin.css");
 	}
 
 }

@@ -208,7 +208,7 @@ $ curl -I https://<your-server>/_webhooks -X POST # expected response: 300 Multi
 $ curl -I https://<your-server>/_webhooks/publish -X POST # expected response: 400 Bad Request (no payload)
 $ curl -I https://<your-server>/_webhooks/broken -X POST # expected response: 404 Not Found
 ```
-We'll test for successful requests and add more complexity in the next step. We'd need to make up a smaple commit summary payload if we were to test this here, and it's much easier to just do it for real.
+We'll test for successful requests and add more complexity in the next step. We'd need to make up a sample commit summary payload if we were to test this here, and it's much easier to just do it for real.
 
 #### Origin responds to pushes from _E_ by sending webhook requests to _R_
 🦆 We now need to put the key piece in the middle of this pipeline. _These instructions only apply to Github, other providers will presumably have similar setup steps._

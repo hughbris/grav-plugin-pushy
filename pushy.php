@@ -81,8 +81,8 @@ class PushyPlugin extends Plugin
 			]);
 		} else {
 			$this->enable([
-				'onPageInitialized'      => ['serveHooks', 0],
-			]);
+				'onPageInitialized' => ['serveHooks', 0],
+				]);
 		}
 	}
 
@@ -133,8 +133,7 @@ class PushyPlugin extends Plugin
 		}
 	}
 
-	public function serveHooks()
-	{
+	public function serveHooks(): void {
 
 		$webhooks = $this->config->get("plugins.{$this->name}.webhooks");
 		if (!($webhooks['enabled'] ?? FALSE)) {

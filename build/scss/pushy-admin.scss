@@ -1,0 +1,57 @@
+
+.button-bar i {
+    margin-right: 0.5rem;
+}
+
+.pushy {
+
+    th.path,
+    th.message,
+    td.path,
+    td.message {
+        flex: 1;
+    }
+
+    th.select-all,
+    td.select {
+        flex: 0;
+        text-align: center;
+    }
+
+    .buttons {
+        display: flex;
+        justify-content: end;
+        margin: 1rem 1.5rem 0;
+
+        button {
+            margin-left: 1rem;
+        }
+    }
+
+    .bulk {
+        display: flex;
+        align-items: baseline;
+    }
+
+    .bulk-checkbox {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: baseline;
+        margin: 1rem 1rem 0 1.5rem;
+    }
+
+    #bulk-message {
+        margin-right: 1.5rem;
+        visibility: hidden;
+    }
+
+    .page-commit {
+        pointer-events: none;
+    }
+
+    input[type=text] {
+        border: 1px solid #e6e6e6;
+        background: #fcfcfc;
+        color: #646e7c;
+    }
+}

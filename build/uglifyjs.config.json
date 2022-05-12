@@ -1,0 +1,6 @@
+{
+    "compress":  {
+        "typeofs": false
+    },
+    "mangle": true
+}

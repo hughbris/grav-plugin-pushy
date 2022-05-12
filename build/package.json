@@ -1,0 +1,36 @@
+{
+    "name": "pushy",
+    "description": "Save pages in a Git repo.",
+    "version": "1.0.0",
+    "keywords": [
+        "grav",
+        "admin"
+    ],
+    "scripts": {
+        "build": "npm-run-all --parallel css js",
+        "css": "npm-run-all --sequential css-compile css-prefix css-minify-*",
+        "css-compile": "sass --style expanded --source-map --embed-sources --no-error-css ./scss:../css",
+        "css-compile-watch": "sass --watch --style expanded --source-map --embed-sources --no-error-css ./scss:../css",
+        "css-prefix": "postcss  --config .  --replace \"../css/*.css\"",
+        "css-minify-admin": "cleancss -O1 --format breakWith=lf --with-rebase --source-map --input-source-map ../css/pushy-admin.css.map --source-map-inline-sources --output ../css/pushy-admin.min.css ../css/pushy-admin.css",
+        "js": "npm-run-all js-once js-minify",
+        "js-watch": "tsc --project . --watch",
+        "js-once": "tsc --project .",
+        "js-minify": "uglifyjs-folder ../js --pattern \"**/*.js,!**/*.min.js\" --output ../js --each --harmony --config-file uglifyjs.config.json"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@typescript-eslint/eslint-plugin": "^4.23.0",
+        "@typescript-eslint/parser": "^4.23.0",
+        "autoprefixer": "^10.2.5",
+        "clean-css-cli": "^5.3.0",
+        "eslint": "^7.26.0",
+        "npm-run-all": "^4.1.5",
+        "postcss": "^8.2.15",
+        "postcss-cli": "^8.3.1",
+        "sass": "1.32.13",
+        "tslib": "^2.2.0",
+        "typescript": "4.2.4",
+        "uglifyjs-folder": "^2.0.0"
+    }
+}

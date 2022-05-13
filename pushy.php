@@ -145,7 +145,7 @@ class PushyPlugin extends Plugin
 
 			if ($webhooks['secret'] ?? FALSE) {
 				if (!self::isWebhookAuthenticated($webhooks['secret'])) { // authentication fails
-					$this->jsonRespond(401, [
+					self::jsonRespond(401, [
 						'status' => 'error',
 						'message' => 'Unauthorized request',
 					]);
@@ -153,7 +153,7 @@ class PushyPlugin extends Plugin
 			}
 
 			if (strtoupper($_SERVER['REQUEST_METHOD']) != 'POST') {
-				$this->jsonRespond(405, [
+				self::jsonRespond(405, [
 					'status' => 'error',
 					'message' => 'Only POST operations supported',
 				]);
@@ -162,8 +162,16 @@ class PushyPlugin extends Plugin
 			$endpoints = $webhooks['endpoints'] ?? [];
 
 			// check if the request path is an exact match with the webhook root path
+<<<<<<< HEAD
 			if ($this->grav['uri']->uri() == $webhooks['path']) {
 				$this->jsonRespond(300, [
+||||||| parent of c35d313 (Change jsonRespond method to static)
+			if($this->grav['uri']->uri() == $webhooks['path']) {
+				$this->jsonRespond(300, [
+=======
+			if($this->grav['uri']->uri() == $webhooks['path']) {
+				self::jsonRespond(300, [
+>>>>>>> c35d313 (Change jsonRespond method to static)
 					'status' => 'info',
 					'message' => ('Available endpoints are: ' . implode(', ', array_keys($endpoints))),
 				]);
@@ -177,7 +185,7 @@ class PushyPlugin extends Plugin
 
 					// check for declared hook response action
 					if (!$hook_properties || !array_key_exists('run', $hook_properties)) {
-						$this->jsonRespond(418, [
+						self::jsonRespond(418, [
 							'status' => 'undefined',
 							'message' => 'Am teapot, no operation specified or performed',
 							// 'debug' => $hook_properties,
@@ -188,8 +196,16 @@ class PushyPlugin extends Plugin
 					$payload = file_get_contents('php://input');
 					$payload = !empty($payload) ? json_decode($payload) : FALSE;
 
+<<<<<<< HEAD
 					if (!$payload) {
 						$this->jsonRespond(400, [
+||||||| parent of c35d313 (Change jsonRespond method to static)
+					if(!$payload) {
+						$this->jsonRespond(400, [
+=======
+					if(!$payload) {
+						self::jsonRespond(400, [
+>>>>>>> c35d313 (Change jsonRespond method to static)
 							'status' => 'undefined',
 							'message' => 'No payload or invalid payload',
 							// 'debug' => $hook_properties,
@@ -201,16 +217,32 @@ class PushyPlugin extends Plugin
 
 						$conditions = $hook_properties['conditions'];
 
+<<<<<<< HEAD
 						if (array_key_exists('branch', $conditions) && ($this->parsePayload($payload, 'branch') !== $conditions['branch'])) {
 							$this->jsonRespond(422, [ // FIXME: 422 not sure
+||||||| parent of c35d313 (Change jsonRespond method to static)
+						if(array_key_exists('branch', $conditions) && ($this->parsePayload($payload, 'branch') !== $conditions['branch'])) {
+							$this->jsonRespond(422, [ // FIXME: 422 not sure
+=======
+						if(array_key_exists('branch', $conditions) && ($this->parsePayload($payload, 'branch') !== $conditions['branch'])) {
+							self::jsonRespond(422, [ // FIXME: 422 not sure
+>>>>>>> c35d313 (Change jsonRespond method to static)
 								'status' => 'undefined',
 								'message' => 'Branch constraint not met',
 								// 'debug' => $hook_properties,
 							]);
 						}
 
+<<<<<<< HEAD
 						if (array_key_exists('committer', $conditions) && ($this->parsePayload($payload, 'committer') !== $conditions['committer'])) {
 							$this->jsonRespond(422, [ // FIXME: 422 not sure
+||||||| parent of c35d313 (Change jsonRespond method to static)
+						if(array_key_exists('committer', $conditions) && ($this->parsePayload($payload, 'committer') !== $conditions['committer'])) {
+							$this->jsonRespond(422, [ // FIXME: 422 not sure
+=======
+						if(array_key_exists('committer', $conditions) && ($this->parsePayload($payload, 'committer') !== $conditions['committer'])) {
+							self::jsonRespond(422, [ // FIXME: 422 not sure
+>>>>>>> c35d313 (Change jsonRespond method to static)
 								'status' => 'undefined',
 								'message' => 'Committer constraint not met',
 								// 'debug' => $this->parsePayload($payload, 'committer'),
@@ -223,15 +255,33 @@ class PushyPlugin extends Plugin
 						$action = $hook_properties['run'];
 						$result = self::triggerSchedulerJob($action);
 
+<<<<<<< HEAD
 						if ($result) {
 							$this->jsonRespond(200, [
+||||||| parent of c35d313 (Change jsonRespond method to static)
+						if($result) {
+							$this->jsonRespond(200, [
+=======
+						if($result) {
+							self::jsonRespond(200, [
+>>>>>>> c35d313 (Change jsonRespond method to static)
 								'status' => 'success',
 								'message' => "Operation succeeded: '$action'",
 								// 'debug' => $hook_properties,
 							]);
 						}
+<<<<<<< HEAD
 					} catch (\Exception $e) {
 						$this->jsonRespond(500, [
+||||||| parent of c35d313 (Change jsonRespond method to static)
+					}
+					catch (\Exception $e) {
+						$this->jsonRespond(500, [
+=======
+					}
+					catch (\Exception $e) {
+						self::jsonRespond(500, [
+>>>>>>> c35d313 (Change jsonRespond method to static)
 							'status' => 'error',
 							'message' => "Operation failed: '$action' with \"{$e->getMessage()}\"",
 							// 'debug' => $hook_properties,
@@ -241,7 +291,7 @@ class PushyPlugin extends Plugin
 			}
 
 			// 404 fallback for endpoints under webhooks path, happens anyway I think but this sets useful JSON body
-			$this->jsonRespond(404, [
+			self::jsonRespond(404, [
 				'status' => 'error',
 				'message' => 'Endpoint not found',
 				// 'debug' => $webhooks,
@@ -339,15 +389,20 @@ class PushyPlugin extends Plugin
 		return FALSE;
 	}
 
-	// TODO: this can be static
 	/**
 	 * Provide a HTTP status and JSON response and exit
 	 * @param  int    $http_status   HTTP status number to return
 	 * @param  array  $proto_payload Payload as array to be served as JSON
 	 * @return void
 	 */
+<<<<<<< HEAD
 	private function jsonRespond(int $http_status, array $proto_payload): void
 	{
+||||||| parent of c35d313 (Change jsonRespond method to static)
+	private function jsonRespond(int $http_status, array $proto_payload): void {
+=======
+	private static function jsonRespond(int $http_status, array $proto_payload): void {
+>>>>>>> c35d313 (Change jsonRespond method to static)
 		header('Content-Type: application/json');
 		http_response_code($http_status);
 		echo json_encode($proto_payload);

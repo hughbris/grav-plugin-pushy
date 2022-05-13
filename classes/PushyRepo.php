@@ -120,6 +120,27 @@ class PushyRepo extends Git {
 	}
 
 	/**
+	 * @param string $message
+	 * @return string[]
+	 */
+	public function commit($message) {
+
+		if(!isset($this->grav['session'])) {
+			return; // FIXME
+		}
+
+		// TODO: process placeholders/Twig in $message
+
+		$user = $this->grav['session']->user->fullname; // TODO: add fallback as this is not required I think
+		$email = $this->grav['session']->user->email;
+
+		$author = $user . ' <' . $email . '>';
+		$authorFlag = '--author="' . $author . '"';
+
+		return $this->execute("commit $authorFlag -m " . escapeshellarg($message));
+	}
+
+	/**
 	 * @param string $command
 	 * @param bool $quiet
 	 * @return string[]

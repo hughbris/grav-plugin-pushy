@@ -9,11 +9,11 @@ use Iterator;
 use JsonSerializable;
 
 /**
- * Array of urls and their accompanying changedPage
+ * Array of urls and their accompanying changedItems
  */
-class ChangedPages implements ArrayAccess, Countable, Iterator, JsonSerializable
+class ChangedItems implements ArrayAccess, Countable, Iterator, JsonSerializable
 {
-    /** @var array<string, ChangedPage> */
+    /** @var array<string, ChangedItems> */
     private $container = [];
 
     /** @var int */
@@ -21,22 +21,22 @@ class ChangedPages implements ArrayAccess, Countable, Iterator, JsonSerializable
 
     public function toArray(): array
     {
-        $changedPages = [];
+        $changedItems = [];
 
-        foreach ($this->container as $url => $changedPage) {
-            $changedPages[$url] = (array) $changedPage;
+        foreach ($this->container as $url => $changedItem) {
+            $changedItems[$url] = (array) $changedItem;
         }
 
-        return $changedPages;
+        return $changedItem;
     }
 
     /**
      * @param string $url
-     * @param ChangedPage $changedPage
+     * @param ChangedItem $changedItem
      */
-    public function offsetSet($url, $changedPage): void
+    public function offsetSet($url, $changedItem): void
     {
-        $this->container[$url] = $changedPage;
+        $this->container[$url] = $changedItem;
     }
 
 
@@ -59,7 +59,7 @@ class ChangedPages implements ArrayAccess, Countable, Iterator, JsonSerializable
 
     /**
      * @param string $url
-     * @return ChangedPage
+     * @return ChangedItem
      * @throws Exception If offset does not exist
      */
     public function offsetGet($url)
@@ -67,7 +67,7 @@ class ChangedPages implements ArrayAccess, Countable, Iterator, JsonSerializable
         if (isset($this->container[$url])) {
             return $this->container[$url];
         } else {
-            throw new Exception("No changedPage for route $url");
+            throw new Exception("No changedItem for route $url");
         }
     }
 
@@ -96,14 +96,14 @@ class ChangedPages implements ArrayAccess, Countable, Iterator, JsonSerializable
     }
 
     /**
-     * @return ChangedPage
+     * @return ChangedItem
      */
     public function current()
     {
         $urls = array_keys($this->container);
-        $changedPage = $this->container[$urls[$this->index]];
+        $changedItem = $this->container[$urls[$this->index]];
 
-        return $changedPage;
+        return $changedItem;
     }
 
     /**
@@ -135,12 +135,12 @@ class ChangedPages implements ArrayAccess, Countable, Iterator, JsonSerializable
 
     public function jsonSerialize()
     {
-        $changedPages = [];
+        $changedItems = [];
 
-        foreach ($this->container as $url => $changedPage) {
-            $changedPages[$url] = (array) $changedPage;
+        foreach ($this->container as $url => $changedItem) {
+            $changedItems[$url] = (array) $changedItem;
         }
 
-        return $changedPages;
+        return $changedItems;
     }
 }

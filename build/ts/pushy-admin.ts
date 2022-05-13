@@ -1,11 +1,11 @@
-interface ChangedPage {
+interface ChangedItem {
     working: string;
     index: string;
     path: string;
 }
 
-interface ChangedPages {
-    [url: string]: ChangedPage;
+interface ChangedItems {
+    [url: string]: ChangedItem;
 }
 
 interface Response {
@@ -13,159 +13,172 @@ interface Response {
     alert: string;
 }
 
-interface PageData {
-    path: string;
-    message: string;
+interface PublishingData {
+    paths: string[];
+    summary: string;
+    notes: string;
 }
 
 class PushyAdmin {
 
     constructor() {
-        this.initButtonHandlers();
+        this.initEventHandlers();
     }
 
-    public initButtonHandlers() {
-        const commitButton = document.getElementById('commit-selected') as HTMLElement;
+    public initEventHandlers() {
+        const publishButton = document.getElementById('publish') as HTMLElement;
 
-        commitButton.addEventListener('click', (event) => {
+        publishButton.addEventListener('click', (event) => {
             event.preventDefault();
 
-            const pages: PageData[] = this.getSelectedPages();
-            void this.commitPages(pages);
-        });
+            const publishingItems: PublishingData | undefined = this.getSelectedItems();
 
-        const revertButton = document.getElementById('revert-selected') as HTMLElement;
-
-        revertButton.addEventListener('click', (event) => {
-            event.preventDefault();
-
-            const pages: PageData[] = this.getSelectedPages();
-            void this.revertPages(pages);
-        });
-
-        const selectAll = document.getElementById('select-all') as HTMLInputElement;
-
-        selectAll.addEventListener('click', () => {
-            const allBoxes = document.getElementsByClassName('selectbox');
-            const isSelectAllChecked = selectAll.checked;
-
-            for (let i = 0; i < allBoxes.length; i++) {
-                const select = allBoxes[i] as HTMLInputElement;
-                select.checked = isSelectAllChecked;
+            if (publishingItems) {
+                void this.publishItems(publishingItems);
             }
         });
 
-        const bulkSelect = document.getElementById('bulk-select') as HTMLInputElement;
-        const bulkMessage = document.getElementById('bulk-message') as HTMLInputElement;
+        const selectAllCheckbox = document.getElementById('select-all') as HTMLInputElement;
 
-        bulkSelect.addEventListener('click', () => {
-            bulkMessage.style.visibility = bulkSelect.checked ? 'visible' : 'hidden';
+        selectAllCheckbox.addEventListener('click', () => {
+            const allCheckboxes = document.getElementsByClassName('selectbox') as HTMLCollectionOf<HTMLInputElement>;
+
+            for (const checkbox of allCheckboxes) {
+                checkbox.checked = selectAllCheckbox.checked;
+            }
+
+            this.enablePublishButton();
+        });
+
+        const summary = document.getElementById('summary') as HTMLInputElement;
+
+        summary.addEventListener('input', () => {
+            this.enablePublishButton()
         });
     }
 
-    private getSelectedPages() {
-        const selected = document.getElementsByClassName('selectbox');
-        const pages: PageData[] = [];
+    private getSelectedItems(): PublishingData | undefined {
+        const publishingData: PublishingData = {
+            paths: [],
+            summary: '',
+            notes: '',
+        };
 
-        for (let i = 0; i < selected.length; i++) {
-            const select = selected[i] as HTMLInputElement;
-            const message = document.getElementById(`message${i}`) as HTMLInputElement;
+        const summary = document.getElementById('summary') as HTMLInputElement;
+        const summaryAlert = document.getElementById('summary-alert') as HTMLInputElement;
 
-            if (select.checked) {
-                pages.push({
-                    path: select.value,
-                    message: message.value,
-                });
-            }
-        }
-        return pages;
-    }
+        if (!summary.value) {
+            summary.classList.add('invalid');
+            summaryAlert.classList.add('invalid');
 
-    public async readPages(): Promise<void> {
-        if (!window.location.pathname.endsWith('/admin/publish')) {
             return;
         }
 
-        let answer: ChangedPages;
+        summary.classList.remove('invalid');
+        summaryAlert.classList.remove('invalid');
+
+        publishingData.summary = summary.value;
+
+        const notes = document.getElementById('notes') as HTMLInputElement;
+        publishingData.notes = notes.value;
+
+        const checkboxes = document.getElementsByClassName('selectbox') as HTMLCollectionOf<HTMLInputElement>;
+        for (const checkbox of checkboxes) {
+            if (checkbox.checked) {
+                publishingData.paths.push(checkbox.value);
+            }
+        }
+
+        return publishingData;
+    }
+
+    public async fetchItems(): Promise<void> {
+        let answer: ChangedItems;
 
         try {
             const response = await fetch(
-                window.location.pathname + '/pushy:readPages',
+                window.location.pathname + '/pushy:readItems',
                 {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
                 }
             );
 
             if (response.ok) {
-                answer = await response.json() as ChangedPages;
+                answer = await response.json() as ChangedItems;
             } else {
-                this.notify('ReadPages: No valid response from server.', 'error');
+                this.setBannerText('Read Items: No valid response from server.', 'error');
 
                 return;
             }
         } catch (error) {
-            this.notify('ReadPages: Unexpected error while accessing the server.', 'error');
+            this.setBannerText('Read Items: Unexpected error while accessing the server.', 'error');
 
             return;
         }
 
         if (answer) {
-            this.clearAlerts();
+            const itemCount = Object.keys(answer).length;
 
-            const pageCount = Object.keys(answer).length;
-
-            if (pageCount > 0) {
-                this.notify(`Found ${pageCount} changed pages`, 'info');
+            if (itemCount == 0) {
+                this.setBannerText('Nothing to publish', 'info');
             } else {
-                this.notify('No changes pages found', 'info');
+                this.displayItems(answer);
             }
-
-            this.displayPages(answer);
         }
     }
 
-    private displayPages(pages: ChangedPages) {
-        const tableRows = document.getElementById('pagelist') as HTMLElement;
+    private clearInputs() {
+        const inputs = document.querySelectorAll<HTMLInputElement>('input, textarea');
+
+        for(const input of inputs) {
+            input.value = '';
+            input.checked = false;
+        }
+    }
+
+    private displayItems(items: ChangedItems) {
+        this.clearInputs();
+
+        const tableRows = document.getElementById('itemlist') as HTMLElement;
         tableRows.innerHTML = '';
 
-        Object.keys(pages).forEach((path: string, i: number) => {
-            const page: ChangedPage = pages[path];
+        Object.keys(items).forEach((path: string, i: number) => {
+            const item: ChangedItem = items[path];
 
-            const pageRow = document.createElement('tr');
+            const itemRow = document.createElement('tr');
 
-            pageRow.innerHTML = `
-            <td class="select">
-                <input id="selectbox${i}" class="selectbox" type="checkbox" value="${page.path}">
-            </td>
-             <td class="path">${page.path}</td>
-           <td class="message">
-                <input id="message${i}" class="message" type="text">
-            </td>
+            itemRow.innerHTML = `
+                <td class="select">
+                    <input id="selectbox${i}" class="selectbox" type="checkbox" value="${item.path}">
+                </td>
+                <td class="path">${item.path}</td>
             `;
 
-            tableRows.appendChild(pageRow);
+            tableRows.appendChild(itemRow);
         });
+
+
+        const checkboxes = document.getElementsByClassName('selectbox');
+        for (const box of checkboxes) {
+            box.addEventListener('click', () => {
+                this.enablePublishButton()
+            });
+        }
     }
 
-    public async commitPages(pages: PageData[]) {
+    public async publishItems(items: PublishingData) {
         let response: Response;
 
         try {
             response = await fetch(
-                window.location.pathname + '/pushy:commitPages',
+                window.location.pathname + '/pushy:publishItems',
                 {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(pages),
+                    body: JSON.stringify(items),
                 }
             );
         } catch (error) {
-            this.notify('CommitPage: Unexpected error while accessing the server.', 'error');
+            this.setBannerText('Publish items: Unexpected error while accessing the server.', 'error');
             return;
         }
 
@@ -173,52 +186,19 @@ class PushyAdmin {
             const answer = await response.json() as Response;
 
             if (answer.isSuccess) {
-                this.notify(answer.alert, 'info');
+                this.setBannerText(answer.alert, 'info');
             } else {
-                this.notify(answer.alert, 'error');
+                this.setBannerText(answer.alert, 'error');
             }
 
-            // void this.readPages();
+            void this.fetchItems();
         } else {
-            this.notify('No valid response from server.', 'error');
+            this.setBannerText('No valid response from server.', 'error');
         }
     }
 
-
-    public async revertPages(pages: PageData[]) {
-        let response: Response;
-
-        try {
-            response = await fetch(
-                window.location.pathname + '/pushy:revertPages',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(pages),
-                }
-            );
-        } catch (error) {
-            this.notify('RevertPage: Unexpected error while accessing the server.', 'error');
-            return;
-        }
-
-        if (response.ok) {
-            const answer = await response.json() as Response;
-
-            if (answer.isSuccess) {
-                this.notify(answer.alert, 'info');
-            } else {
-                this.notify(answer.alert, 'error');
-            }
-        } else {
-            this.notify('No valid response from server.', 'error');
-        }
-    }
-
-    public notify(message: string, type: 'info' | 'error') {
-        this.clearAlerts();
+    public setBannerText(message: string, type: 'info' | 'error') {
+        this.clearBannerText();
 
         const newMessage = document.createElement('div');
         newMessage.className = `${type} alert publish`;
@@ -230,7 +210,7 @@ class PushyAdmin {
         messages?.appendChild(newMessage);
     }
 
-    public clearAlerts() {
+    public clearBannerText() {
         const alerts = document.getElementsByClassName('alert publish');
 
         const messages = document.getElementById('messages');
@@ -239,7 +219,19 @@ class PushyAdmin {
             messages?.removeChild(alert);
         }
     }
+
+    public enablePublishButton() {
+        const summary = document.getElementById('summary') as HTMLInputElement;
+        const hasCheckedItems = document.querySelectorAll('.selectbox:checked').length > 0;
+        const publishButton = document.getElementById('publish') as HTMLAnchorElement;
+
+        if (summary.value && hasCheckedItems) {
+            publishButton.classList.add('enabled');
+        } else {
+            publishButton.classList.remove('enabled');
+        }
+    }
 }
 
 const admin = new PushyAdmin();
-void admin.readPages();
+void admin.fetchItems();

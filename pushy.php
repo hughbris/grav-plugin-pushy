@@ -1,9 +1,12 @@
 <?php
+
 namespace Grav\Plugin;
 
 use Composer\Autoload\ClassLoader;
+use Exception;
 use Grav\Common\Plugin;
 use Grav\Common\Page\Page;
+use Grav\Common\Uri;
 use Grav\Plugin\Pushy\RequestHandler;
 use RocketTheme\Toolbox\Event\Event;
 use Grav\Plugin\Pushy\PushyRepo;
@@ -13,7 +16,8 @@ use Grav\Plugin\Pushy\GitUtils;
  * Class PushyPlugin
  * @package Grav\Plugin
  */
-class PushyPlugin extends Plugin {
+class PushyPlugin extends Plugin
+{
 	/** @var PushyRepo */
 	protected $repo;
 
@@ -23,12 +27,13 @@ class PushyPlugin extends Plugin {
 	/**
 	 * @return array
 	 */
-	public static function getSubscribedEvents(): array {
+	public static function getSubscribedEvents(): array
+	{
 		return [
 			'onPluginsInitialized' => [
 				['onPluginsInitialized', 0],
-				],
-			];
+			],
+		];
 	}
 
 	/**
@@ -36,52 +41,56 @@ class PushyPlugin extends Plugin {
 	 *
 	 * @return ClassLoader
 	 */
-	public function autoload(): ClassLoader	{
+	public function autoload(): ClassLoader
+	{
 		return require __DIR__ . '/vendor/autoload.php';
 	}
 
 	/**
 	 * Initialize the class instance
 	 */
-	public function init():void {
+	public function init(): void
+	{
 		$this->repo = new PushyRepo();
 	}
 
 	/**
 	 * Initialize the plugin
 	 */
-	public function onPluginsInitialized(): void {
+	public function onPluginsInitialized(): void
+	{
 		$this->init();
 
 		if ($this->isAdmin()) {
-			/** @var RequestHandler */
-			$requestHandler = new RequestHandler();
-			$response = $requestHandler->handleRequest();
+			if ($this->isOnRoute()) {
+				/** @var RequestHandler */
+				$requestHandler = new RequestHandler();
+				$response = $requestHandler->handleRequest();
 
-			if ($response) {
-				echo json_encode($response);
-				die();
+				if ($response) {
+					echo json_encode($response);
+					die();
+				}
 			}
-			
+
 			$this->enable([
 				'onAdminTwigTemplatePaths'  => ['setAdminTwigTemplatePaths', 0],
 				'onAdminMenu' => ['showPublishingMenu', 0],
 				'onTwigSiteVariables' => ['setTwigSiteVariables', 0],
 				'onAssetsInitialized' => ['onAssetsInitialized', 0],
-				]);
-		}
-
-		else {
+			]);
+		} else {
 			$this->enable([
 				'onPageInitialized'      => ['serveHooks', 0],
-				]);
+			]);
 		}
 	}
 
 	/**
 	 * Get admin page template
 	 */
-	public function setAdminTwigTemplatePaths(Event $event): void {
+	public function setAdminTwigTemplatePaths(Event $event): void
+	{
 		$paths = $event['paths'];
 		$paths[] = __DIR__ . DS . 'admin/templates';
 		$event['paths'] = $paths;
@@ -90,7 +99,8 @@ class PushyPlugin extends Plugin {
 	/**
 	 * Show the publishing menu item(s) in Admin
 	 */
-	public function showPublishingMenu(): void {
+	public function showPublishingMenu(): void
+	{
 		$isInitialized = GitUtils::isGitInitialized();
 		// TODO: test for GitUtils::isGitInstalled()
 		$menuLabel = $isInitialized ? 'Publish' : 'Publishing';
@@ -101,7 +111,7 @@ class PushyPlugin extends Plugin {
 			'icon' => 'fa-' . ($isInitialized ? $this->grav['plugins']->get($this->name)->blueprints()->get('icon') : 'cog'),
 			// 'class' => '',
 			// 'data' => [],
-			];
+		];
 
 		$this->grav['twig']->plugins_hooked_nav[$menuLabel] = $options; // TODO: make this configurable in YAML/blueprint
 	}
@@ -109,7 +119,8 @@ class PushyPlugin extends Plugin {
 	/**
 	 * Set any special variables for Twig templates
 	 */
-	public function setTwigSiteVariables(): void {
+	public function setTwigSiteVariables(): void
+	{
 		$publish_path = $this->config->get('plugins.admin.route') . DS . $this->admin_route;
 		$route = $this->grav['uri']->path();
 
@@ -122,7 +133,8 @@ class PushyPlugin extends Plugin {
 		}
 	}
 
-	public function serveHooks() {
+	public function serveHooks()
+	{
 
 		$webhooks = $this->config->get("plugins.{$this->name}.webhooks");
 		if (!($webhooks['enabled'] ?? FALSE)) {
@@ -137,7 +149,7 @@ class PushyPlugin extends Plugin {
 					$this->jsonRespond(401, [
 						'status' => 'error',
 						'message' => 'Unauthorized request',
-						]);
+					]);
 				}
 			}
 
@@ -145,24 +157,24 @@ class PushyPlugin extends Plugin {
 				$this->jsonRespond(405, [
 					'status' => 'error',
 					'message' => 'Only POST operations supported',
-					]);
+				]);
 			}
 
 			$endpoints = $webhooks['endpoints'] ?? [];
 
 			// check if the request path is an exact match with the webhook root path
-			if($this->grav['uri']->uri() == $webhooks['path']) {
+			if ($this->grav['uri']->uri() == $webhooks['path']) {
 				$this->jsonRespond(300, [
 					'status' => 'info',
 					'message' => ('Available endpoints are: ' . implode(', ', array_keys($endpoints))),
-					]);
+				]);
 			}
 
 			foreach ($endpoints as $hook => $hook_properties) {
 
 				// match on the endpoint
 				$endpoint = strtolower(implode('/', [$webhooks['path'], $hook]));
-				if(strtolower($this->grav['uri']->uri()) ==  $endpoint) {
+				if (strtolower($this->grav['uri']->uri()) ==  $endpoint) {
 
 					// check for declared hook response action
 					if (!$hook_properties || !array_key_exists('run', $hook_properties)) {
@@ -170,19 +182,19 @@ class PushyPlugin extends Plugin {
 							'status' => 'undefined',
 							'message' => 'Am teapot, no operation specified or performed',
 							// 'debug' => $hook_properties,
-							]);
+						]);
 					}
 
 					// let's grab that payload
 					$payload = file_get_contents('php://input');
 					$payload = !empty($payload) ? json_decode($payload) : FALSE;
 
-					if(!$payload) {
+					if (!$payload) {
 						$this->jsonRespond(400, [
 							'status' => 'undefined',
 							'message' => 'No payload or invalid payload',
 							// 'debug' => $hook_properties,
-							]);
+						]);
 					}
 
 					// check declared conditions
@@ -190,21 +202,21 @@ class PushyPlugin extends Plugin {
 
 						$conditions = $hook_properties['conditions'];
 
-						if(array_key_exists('branch', $conditions) && ($this->parsePayload($payload, 'branch') !== $conditions['branch'])) {
+						if (array_key_exists('branch', $conditions) && ($this->parsePayload($payload, 'branch') !== $conditions['branch'])) {
 							$this->jsonRespond(422, [ // FIXME: 422 not sure
 								'status' => 'undefined',
 								'message' => 'Branch constraint not met',
 								// 'debug' => $hook_properties,
-								]);
-							}
+							]);
+						}
 
-						if(array_key_exists('committer', $conditions) && ($this->parsePayload($payload, 'committer') !== $conditions['committer'])) {
+						if (array_key_exists('committer', $conditions) && ($this->parsePayload($payload, 'committer') !== $conditions['committer'])) {
 							$this->jsonRespond(422, [ // FIXME: 422 not sure
 								'status' => 'undefined',
 								'message' => 'Committer constraint not met',
 								// 'debug' => $this->parsePayload($payload, 'committer'),
-								]);
-							}
+							]);
+						}
 					}
 
 					try {
@@ -212,20 +224,19 @@ class PushyPlugin extends Plugin {
 						$action = $hook_properties['run'];
 						$result = self::triggerSchedulerJob($action);
 
-						if($result) {
+						if ($result) {
 							$this->jsonRespond(200, [
 								'status' => 'success',
 								'message' => "Operation succeeded: '$action'",
 								// 'debug' => $hook_properties,
-								]);
+							]);
 						}
-					}
-					catch (\Exception $e) {
+					} catch (\Exception $e) {
 						$this->jsonRespond(500, [
 							'status' => 'error',
 							'message' => "Operation failed: '$action' with \"{$e->getMessage()}\"",
 							// 'debug' => $hook_properties,
-							]);
+						]);
 					}
 				}
 			}
@@ -235,8 +246,7 @@ class PushyPlugin extends Plugin {
 				'status' => 'error',
 				'message' => 'Endpoint not found',
 				// 'debug' => $webhooks,
-				]);
-
+			]);
 		}
 	}
 
@@ -245,16 +255,16 @@ class PushyPlugin extends Plugin {
 	 * @param  string $job_name The name (ID) of the task to run
 	 * @return bool             true if the job was found and ran successfully, otherwise throws \Exception
 	 */
-	private static function triggerSchedulerJob($job_name): bool {
+	private static function triggerSchedulerJob($job_name): bool
+	{
 		$scheduler = new \Grav\Common\Scheduler\Scheduler();
 		$job = $scheduler->getJob($job_name);
 		if ($job) {
 			$job->inForeground()->run();
-			if(!$job->isSuccessful()) { // was unsuccessful
+			if (!$job->isSuccessful()) { // was unsuccessful
 				throw new \Exception($job->getOutput());
 			}
-		}
-		else {
+		} else {
 			throw new \Exception('job not defined');
 		}
 		return TRUE; // FIXME: return the job instead, since we can then access its properties and methods from the caller
@@ -266,7 +276,8 @@ class PushyPlugin extends Plugin {
 	 * @return bool           whether or not the request is authorized
 	 */
 	// copied from GitSync base class method isRequestAuthorized()
-	private static function isWebhookAuthenticated($secret): bool {
+	private static function isWebhookAuthenticated($secret): bool
+	{
 		if (isset($_SERVER['HTTP_X_HUB_SIGNATURE'])) {
 			$payload = file_get_contents('php://input') ?: '';
 
@@ -275,8 +286,7 @@ class PushyPlugin extends Plugin {
 
 		if (isset($_SERVER['HTTP_X_GITLAB_TOKEN'])) {
 			return self::isGitlabTokenValid($secret, $_SERVER['HTTP_X_GITLAB_TOKEN']);
-		}
-		else {
+		} else {
 			$payload = file_get_contents('php://input');
 			return self::isGiteaSecretValid($secret, $payload);
 		}
@@ -292,7 +302,8 @@ class PushyPlugin extends Plugin {
 	 * @return bool            whether the signature is valid or not
 	 */
 	// copied from GitSync base class method but uses more secure hash_equals()
-	private static function isGithubSignatureValid($secret, $signatureHeader, $payload): bool {
+	private static function isGithubSignatureValid($secret, $signatureHeader, $payload): bool
+	{
 		[$algorithm, $signature] = explode('=', $signatureHeader);
 
 		return hash_equals($signature, hash_hmac($algorithm, $payload, $secret));
@@ -306,7 +317,8 @@ class PushyPlugin extends Plugin {
 	 */
 	// copied from GitSync base class method but uses more secure hash_equals()
 	// TODO: untested
-	private static function isGitlabTokenValid($secret, $token): bool {
+	private static function isGitlabTokenValid($secret, $token): bool
+	{
 		return hash_equals($secret, $token);
 	}
 
@@ -318,7 +330,8 @@ class PushyPlugin extends Plugin {
 	 */
 	// copied from GitSync base class method but uses more secure hash_equals()
 	// TODO: untested
-	private static function isGiteaSecretValid($secret, $payload): bool {
+	private static function isGiteaSecretValid($secret, $payload): bool
+	{
 		$payload = json_decode($payload, TRUE);
 		if (!empty($payload) && isset($payload['secret'])) {
 			return hash_equals($secret, $payload['secret']);
@@ -332,7 +345,8 @@ class PushyPlugin extends Plugin {
 	 * @param  array  $proto_payload Payload as array to be served as JSON
 	 * @return void
 	 */
-	private function jsonRespond(int $http_status, array $proto_payload): void {
+	private function jsonRespond(int $http_status, array $proto_payload): void
+	{
 		header('Content-Type: application/json');
 		http_response_code($http_status);
 		echo json_encode($proto_payload);
@@ -345,8 +359,9 @@ class PushyPlugin extends Plugin {
 	 * @param  string $component     Enumerated standard element name to be extracted
 	 * @return mixed
 	 */
-	private function parsePayload($payload, $component) {
-		switch($component) {
+	private function parsePayload($payload, $component)
+	{
+		switch ($component) {
 			case 'branch':
 				if (property_exists($payload, 'ref')) {
 					return substr($payload->ref, strlen('refs/heads/'));
@@ -360,15 +375,24 @@ class PushyPlugin extends Plugin {
 		return NULL;
 	}
 
-	public function onAssetsInitialized() {
+	public function onAssetsInitialized()
+	{
+		if (!$this->isOnRoute()) {
+			return;
+		}
+
 		/** @var Assets */
 		$assets = $this->grav['assets'];
 
-		// Add script for all Admin pages. Must at least check on which page user is.
-
-		/** @psalm-suppress TooManyArguments */
 		$assets->addJs("plugin://pushy/js/pushy-admin.js", ['type' => 'module']);
 		$assets->addCss("plugin://pushy/css/pushy-admin.css");
 	}
 
+	protected function isOnRoute()
+	{
+		$currentPath = $this->grav['uri']->path();
+		$publishPath = $this->config->get('plugins.admin.route') . "/$this->admin_route";
+
+		return $currentPath === $publishPath;
+	}
 }

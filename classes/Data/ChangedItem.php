@@ -2,15 +2,15 @@
 
 namespace Grav\Plugin\Pushy\Data;
 
-class ChangedPage
+class ChangedItem
 {
     public string $working = '';
     public string $index = '';
     public string $path = '';
 
     /** 
-     * Parse array of changed page data into ChangedPage
-     * @param array{change: string, page: string, notes: string} $data 
+     * Parse array of changed item data into ChangedItem
+     * @param array{working: string, index: string, path: string} $data 
      */
     public function __construct($data)
     {

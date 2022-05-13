@@ -11,8 +11,8 @@ class GitActionResponse
     public string $alert = '';
 
     /**
-     * @param bool $isSuccess `true` if page has been committed successfully, else `false`
-     * @param string $alert Message describing result of 'commitPages' request
+     * @param bool $isSuccess `true` if item has been committed successfully, else `false`
+     * @param string $alert Message describing result of 'commitItems' request
      */
     public function __construct(bool $isSuccess, string $alert)
     {

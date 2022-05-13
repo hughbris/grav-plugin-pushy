@@ -108,13 +108,15 @@ class PushyRepo extends Git {
 	 */
 	public function stageFiles($statusListing=NULL) {
 		if (is_null($statusListing)) {
-			$files = '.';
-		}
-		else {
 			$files = self::listFiles($this->statusUnstaged());
 		}
-		$command = 'add --all';
-		$this->execute("$command $files");
+		else {
+			$files = $statusListing;
+		}
+		if (!empty($files)) {
+			$command = 'add --all';
+			$this->execute("$command $files");
+		}
 	}
 
 	/**

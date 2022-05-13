@@ -19,6 +19,9 @@ class PushyPlugin extends Plugin {
 	/** @var string */
 	protected $admin_route = 'publish';
 
+	/** @var string */
+	protected $api_route = 'publish/api';
+
 	/**
 	 * @return array
 	 */
@@ -56,7 +59,7 @@ class PushyPlugin extends Plugin {
 			$this->enable([
 				'onAdminTwigTemplatePaths'  => ['setAdminTwigTemplatePaths', 0],
 				'onAdminMenu' => ['showPublishingMenu', 0],
-				'onTwigSiteVariables' => ['setTwigSiteVariables', 0],
+				'onTwigSiteVariables' => ['routeSpecificTasks', 0],
 				]);
 		}
 
@@ -98,8 +101,9 @@ class PushyPlugin extends Plugin {
 	/**
 	 * Set any special variables for Twig templates
 	 */
-	public function setTwigSiteVariables(): void {
+	public function routeSpecificTasks(): void {
 		$publish_path = $this->config->get('plugins.admin.route') . DS . $this->admin_route;
+		$api_path = $this->config->get('plugins.admin.route') . DS . $this->api_route;
 		$route = $this->grav['uri']->path();
 
 		$isInitialized = GitUtils::isGitInitialized();
@@ -108,6 +112,14 @@ class PushyPlugin extends Plugin {
 		if ($isInitialized && $route == $publish_path) {
 			$twig = $this->grav['twig'];
 			$twig->twig_vars['git_index'] = $this->repo->statusSelect(); # TRUE, $env='index', $select='MTDRCA');
+		}
+		elseif(strpos($route, ($api_path . DS)) === 0) {
+			$endpoint = substr($route, strlen($api_path . DS));
+
+
+			$service = $this->repo->service;
+			$response = $service->respond($endpoint, $_POST['data']);
+			self::jsonRespond($response['status'], $response['payload']);
 		}
 	}
 

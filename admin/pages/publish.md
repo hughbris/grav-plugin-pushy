@@ -8,7 +8,7 @@ access:
 
 forms:
     publication-form:
-        action: /publish/ajax/commit.json
+        action: /publish/api/commit
         id: publish-form
         fields:
             -   name: message

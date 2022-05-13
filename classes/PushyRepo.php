@@ -6,6 +6,7 @@ use Grav\Common\Plugin;
 use Grav\Common\Utils;
 use http\Exception\RuntimeException;
 use SebastianBergmann\Git\Git;
+use Grav\Plugin\Pushy\GitService;
 
 class PushyRepo extends Git {
 
@@ -18,10 +19,14 @@ class PushyRepo extends Git {
 	/** @var string */
 	protected $repositoryPath;
 
+	/** @var string */
+	public $service;
+
 	public function __construct() {
 		$this->grav = Grav::instance();
 		$this->config = $this->grav['config']->get('plugins.pushy');
 		$this->repositoryPath = USER_DIR;
+		$this->service = new GitService($this);
 
 		parent::__construct($this->repositoryPath);
 

@@ -12,7 +12,7 @@ forms:
         id: publish-form
         fields:
             -   name: message
-                label: Publication description
+                label: Changes description
                 placeholder: 'e.g. "Updated welcome text"'
                 help: Brief message to describe these changes
                 type: text

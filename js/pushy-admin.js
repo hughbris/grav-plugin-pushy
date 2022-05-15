@@ -97,7 +97,7 @@ class PushyAdmin {
                 <td class="select">
                     <input id="selectbox${i}" class="selectbox" type="checkbox" value="${item.path}">
                 </td>
-                <td class="path">${item.path}</td>
+                <td class="path"><label for="selectbox${i}">${item.path}</label></td>
             `;
             tableRows.appendChild(itemRow);
         });

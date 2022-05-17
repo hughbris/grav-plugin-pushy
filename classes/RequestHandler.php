@@ -95,8 +95,18 @@ class RequestHandler
     private function handlePublishTask(): GitActionResponse
     {
         $pages = json_decode(file_get_contents('php://input'), true);
-        
-        // TODO Handle commit
+
+        try {
+            $paths = implode(' ', $pages['paths']);
+            $this->repo->stageFiles($paths);
+            $this->repo->commit($pages['summary']);
+        }
+        catch(Exception $e) {
+            return new GitActionResponse(
+                false,
+                "There was an error publishing: \"{$e->getMessage()}\"", // FIXME
+           );
+        }
 
         return new GitActionResponse(
             true,

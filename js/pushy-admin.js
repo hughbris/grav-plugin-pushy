@@ -1,4 +1,10 @@
 "use strict";
+var BannerStyle;
+(function (BannerStyle) {
+    BannerStyle[BannerStyle["info"] = 0] = "info";
+    BannerStyle[BannerStyle["notice"] = 1] = "notice";
+    BannerStyle[BannerStyle["error"] = 2] = "error";
+})(BannerStyle || (BannerStyle = {}));
 class PushyAdmin {
     constructor() {
         this.initEventHandlers();
@@ -61,15 +67,16 @@ class PushyAdmin {
                 answer = await response.json();
             }
             else {
-                this.setBannerText('Read Items: No valid response from server.', 'error');
+                this.setBannerText('Read Items: No valid response from server.', BannerStyle.error);
                 return;
             }
         }
         catch (error) {
-            this.setBannerText('Read Items: Unexpected error while accessing the server.', 'error');
+            this.setBannerText('Read Items: Unexpected error while accessing the server.', BannerStyle.error);
             return;
         }
         if (answer) {
+            this.setBannerText(`Found ${Object.keys(answer).length} changed items.`, BannerStyle.info);
             this.displayItems(answer);
         }
     }
@@ -104,6 +111,7 @@ class PushyAdmin {
         }
     }
     async publishItems(items) {
+        this.clearBannerText();
         let response;
         try {
             response = await fetch(window.location.pathname + '/pushy:publishItems', {
@@ -112,27 +120,27 @@ class PushyAdmin {
             });
         }
         catch (error) {
-            this.setBannerText('Publish items: Unexpected error while accessing the server.', 'error');
+            this.setBannerText('Publish items: Unexpected error while accessing the server.', BannerStyle.error);
             return;
         }
         if (response.ok) {
             const answer = await response.json();
             if (answer.isSuccess) {
-                this.setBannerText(answer.alert, 'info');
+                this.setBannerText(answer.alert, BannerStyle.info);
             }
             else {
-                this.setBannerText(answer.alert, 'error');
+                this.setBannerText(answer.alert, BannerStyle.error);
             }
             void this.fetchItems();
         }
         else {
-            this.setBannerText('No valid response from server.', 'error');
+            this.setBannerText('No valid response from server.', BannerStyle.error);
         }
     }
     setBannerText(message, type) {
-        this.clearBannerText();
+        // this.clearBannerText();
         const newMessage = document.createElement('div');
-        newMessage.className = `${type} alert publish`;
+        newMessage.className = `${BannerStyle[type]} alert publish`;
         const newContent = document.createTextNode(message);
         newMessage.appendChild(newContent);
         const messages = document.getElementById('messages');

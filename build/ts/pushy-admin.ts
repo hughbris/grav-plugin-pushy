@@ -117,6 +117,7 @@ class PushyAdmin {
         }
 
         if (answer) {
+            this.updateMenuBadge(answer);
             this.displayItems(answer);
         }
     }
@@ -127,6 +128,19 @@ class PushyAdmin {
         for(const input of inputs) {
             input.value = '';
             input.checked = false;
+        }
+    }
+
+    private updateMenuBadge(changedItems: ChangedItems) {
+        // Find badge for Publish menuitem
+        const allMenuItems = document.querySelectorAll('#admin-menu li');
+        const index = Array.from(allMenuItems).findIndex(node => node.querySelector('em')?.innerHTML == 'Publish');
+        const badge = allMenuItems[index].querySelector('#admin-menu li a .badge.count');
+
+        // If badge is found, update badge
+        if (badge) {
+            const changedItemCount = Object.keys(changedItems).length;
+            badge.innerHTML = changedItemCount > 0 ? changedItemCount.toString() : '';
         }
     }
 

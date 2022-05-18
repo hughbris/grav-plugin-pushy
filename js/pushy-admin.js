@@ -28,11 +28,11 @@ class PushyAdmin {
     getSelectedItems() {
         const publishingData = {
             paths: [],
-            summary: '',
-            notes: '',
+            message: '',
         };
         const summary = document.getElementById('summary');
         const summaryAlert = document.getElementById('summary-alert');
+        const description = document.getElementById('description');
         if (!summary.value) {
             summary.classList.add('invalid');
             summaryAlert.classList.add('invalid');
@@ -40,9 +40,10 @@ class PushyAdmin {
         }
         summary.classList.remove('invalid');
         summaryAlert.classList.remove('invalid');
-        publishingData.summary = summary.value;
-        const notes = document.getElementById('notes');
-        publishingData.notes = notes.value;
+        publishingData.message = summary.value;
+        if (description.value) {
+            publishingData.message += `\n\n${description.value}`;
+        }
         const checkboxes = document.getElementsByClassName('selectbox');
         for (const checkbox of checkboxes) {
             if (checkbox.checked) {

@@ -99,7 +99,7 @@ class RequestHandler
         try {
             $paths = implode(' ', $pages['paths']);
             $this->repo->stageFiles($paths);
-            $this->repo->commit($pages['summary']);
+            $this->repo->commit($pages['message']);
         }
         catch(Exception $e) {
             return new GitActionResponse(

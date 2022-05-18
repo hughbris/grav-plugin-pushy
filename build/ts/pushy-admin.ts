@@ -15,8 +15,7 @@ interface Response {
 
 interface PublishingData {
     paths: string[];
-    summary: string;
-    notes: string;
+    message: string;
 }
 
 class PushyAdmin {
@@ -60,13 +59,13 @@ class PushyAdmin {
     private getSelectedItems(): PublishingData | undefined {
         const publishingData: PublishingData = {
             paths: [],
-            summary: '',
-            notes: '',
+            message: '',
         };
 
         const summary = document.getElementById('summary') as HTMLInputElement;
         const summaryAlert = document.getElementById('summary-alert') as HTMLInputElement;
-
+        const description = document.getElementById('description') as HTMLInputElement;
+ 
         if (!summary.value) {
             summary.classList.add('invalid');
             summaryAlert.classList.add('invalid');
@@ -77,10 +76,11 @@ class PushyAdmin {
         summary.classList.remove('invalid');
         summaryAlert.classList.remove('invalid');
 
-        publishingData.summary = summary.value;
+        publishingData.message = summary.value;
 
-        const notes = document.getElementById('notes') as HTMLInputElement;
-        publishingData.notes = notes.value;
+        if (description.value) {
+            publishingData.message += `\n\n${description.value}`;
+        }
 
         const checkboxes = document.getElementsByClassName('selectbox') as HTMLCollectionOf<HTMLInputElement>;
         for (const checkbox of checkboxes) {

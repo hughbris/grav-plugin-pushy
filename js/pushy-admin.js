@@ -9,7 +9,7 @@ class PushyAdmin {
             event.preventDefault();
             const publishingItems = this.getSelectedItems();
             if (publishingItems) {
-                void this.publishItems(publishingItems);
+                this.publishItems(publishingItems);
             }
         });
         const selectAllCheckbox = document.getElementById('select-all');
@@ -70,13 +70,7 @@ class PushyAdmin {
             return;
         }
         if (answer) {
-            const itemCount = Object.keys(answer).length;
-            if (itemCount == 0) {
-                this.setBannerText('Nothing to publish', 'info');
-            }
-            else {
-                this.displayItems(answer);
-            }
+            this.displayItems(answer);
         }
     }
     clearInputs() {
@@ -93,11 +87,12 @@ class PushyAdmin {
         Object.keys(items).forEach((path, i) => {
             const item = items[path];
             const itemRow = document.createElement('tr');
+            itemRow.innerHTML = '';
             itemRow.innerHTML = `
                 <td class="select">
                     <input id="selectbox${i}" class="selectbox" type="checkbox" value="${item.path}">
                 </td>
-                <td class="path"><label for="selectbox${i}">${item.path}</label></td>
+                <td class="path"><label for="selectbox${i}">${item.path}</td>
             `;
             tableRows.appendChild(itemRow);
         });

@@ -1,0 +1,63 @@
+
+#admin-main .titlebar .button-bar {
+    .button {
+        margin-right: 0.5rem;
+    }
+
+    #publish {
+        pointer-events: none;
+        opacity: .75;
+        &.enabled {
+            pointer-events: initial;
+            cursor: pointer;
+            opacity: 1;
+        }
+    }
+}
+
+.pushy {
+
+    th.path,
+    td.path {
+        flex: 1;
+    }
+
+    th.select-all,
+    td.select {
+        flex: 0;
+        text-align: center;
+        margin-right: 1rem;
+    }
+
+    .message-summary,
+    .message-notes {
+        margin: 1rem 1.5rem;
+    }
+
+    #summary.invalid {
+        border: 1px solid red;
+    }
+
+    #summary-alert {
+        color: red;
+        font-size: .75rem;
+        visibility: hidden;
+
+        &.invalid {
+            margin-top: .5rem !important;
+            visibility: initial;
+        }
+    }
+
+    input[type=text],
+    textarea {
+        border: 1px solid #e6e6e6;
+        background: #fcfcfc;
+        color: #646e7c;
+    }
+
+    .required {
+        color: red;
+        font-size: 1.25rem;
+    }
+}

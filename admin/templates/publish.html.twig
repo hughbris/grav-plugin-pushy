@@ -2,98 +2,40 @@
 
 {% if admin.route %}
 	{% set context = admin.page(true) %}
-{% endif %} {# CHECK THIS??? - what it does #}
-
-{% block javascripts %}
-
-	{% set publish_inline_js %}
-	$(document).ready(function(){
-
-		var form = $('#publish-form');
-		form.submit(function(e) {
-			// prevent form submission
-			e.preventDefault();
-console.log('foo');
-			// submit the form via Ajax
-			$.ajax({
-				url: form.attr('action'),
-				type: form.attr('method'),
-				dataType: 'html',
-				data: form.serialize(),
-				success: function(result) {
-					console.log('success');
-					// Inject the result in the HTML
-					$('#ajax-result').html(result);
-				}
-			});
-		});
-	});
-	{% endset %}
-
-	{{ parent() }}
-	{% do assets.addInlineJS(publish_inline_js) %}
-
-{% endblock %}
+{% endif %}
 
 {% block titlebar %}
-	{#
 	<div class="button-bar">
-		<a class="button" href="{{ base_url }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
+		<a class="button" id="publish">
+			<i class="fa fa-fw fa-upload"></i>Publish</a>
 	</div>
-	#}
-	<h1><i class="fa fa-fw fa-file-text-o"></i> Review and Publish</h1>
+	<h1>
+		<i class="fa fa-fw fa-upload"></i>
+		Publishing
+	</h1>
 {% endblock %}
 
 {% block content %}
-<div class="page-data">
-<div id="ajax-result"></div>
-{# TODO: check for a dirty repo first here #}
-{{ dump('git_index:', git_index )}}
-{% if git_index is defined %}
-	{% if git_index is empty %}
-		<p>No changes to publish in $PATH #FIXME</p>
-	{% else %}
-	{{ page.content|raw }}
+	<div class="pushy">
+		<h1>List of changed items</h1>
 
-	<table class="git-status">
-		<thead>
-			<tr>
-				<th>Change</th>{# TODO: add checkbox #}
-				<th>Page</th>
-				<th>Notes</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for file in git_index %}
-			<tr>
-				<td>{{ file. index }}</td>
-				<td>{{ file.path }}</td>
-				{% set comments = [] %}
-				{% if file.orig_path is defined %}
-					{% set comments = comments|merge(["Renamed from {{ file.orig_path }}"]) %}
-				{% endif %}
-				<td>{{ comments|join('; ') }}</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-	</table>
+		<table>
+			<thead>
+				<th class="select-all"><input id="select-all" type="checkbox"></th>
+				<th class="path">Path</th>
+			</thead>
+			<tbody id="itemlist"></tbody>
+		</table>
+		<div class="message-summary">
+			<label for="summary">Summary for publishing history <span class="required">*</span>:</label>
+			<input id="summary" type="text">
+			<div id="summary-alert" class="">Summary should be provided</div>
+		</div>
+		<div class="message-notes">
+			<label for="notes">Optional notes:</label>
+			<textarea id="notes" rows="3"></textarea>
+		</div>
+		</div>
 
-	<div class="actions">
-	<!--
-	<form name="git-commit" method="post" action="">
-		<input type="submit" value="Publish changes" />
-	</form>
-	-->{{ dump(forms)}}
-	{% include 'forms/form.html.twig' %}
 	</div>
-
-	{% endif %}
-
-{% else %}
-
-<p>Something is amiss with Git index not being passed #FIXME</p>
-	
-{% endif %}
-
-</div>
 {% endblock %}

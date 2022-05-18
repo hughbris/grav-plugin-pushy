@@ -108,13 +108,36 @@ class PushyRepo extends Git {
 	 */
 	public function stageFiles($statusListing=NULL) {
 		if (is_null($statusListing)) {
-			$files = '.';
-		}
-		else {
 			$files = self::listFiles($this->statusUnstaged());
 		}
-		$command = 'add --all';
-		$this->execute("$command $files");
+		else {
+			$files = $statusListing;
+		}
+		if (!empty($files)) {
+			$command = 'add --all';
+			$this->execute("$command $files");
+		}
+	}
+
+	/**
+	 * @param string $message
+	 * @return string[]
+	 */
+	public function commit($message) {
+
+		if(!isset($this->grav['session'])) {
+			return; // FIXME
+		}
+
+		// TODO: process placeholders/Twig in $message
+
+		$user = $this->grav['session']->user->fullname; // TODO: add fallback as this is not required I think
+		$email = $this->grav['session']->user->email;
+
+		$author = $user . ' <' . $email . '>';
+		$authorFlag = '--author="' . $author . '"';
+
+		return $this->execute("commit $authorFlag -m " . escapeshellarg($message));
 	}
 
 	/**

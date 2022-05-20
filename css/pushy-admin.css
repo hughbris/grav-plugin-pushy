@@ -11,6 +11,10 @@
   opacity: 1;
 }
 
+#messages .alert.publish {
+  margin-bottom: 1px;
+}
+
 .pushy th.path,
 .pushy td.path {
   flex: 1;

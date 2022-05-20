@@ -340,6 +340,7 @@ class PushyPlugin extends Plugin
 		return FALSE;
 	}
 
+	// TODO: this can be static
 	/**
 	 * Provide a HTTP status and JSON response and exit
 	 * @param  int    $http_status   HTTP status number to return

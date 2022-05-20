@@ -15,8 +15,7 @@ interface Response {
 
 interface PublishingData {
     paths: string[];
-    summary: string;
-    notes: string;
+    message: string;
 }
 
 enum BannerStyle {
@@ -66,13 +65,13 @@ class PushyAdmin {
     private getSelectedItems(): PublishingData | undefined {
         const publishingData: PublishingData = {
             paths: [],
-            summary: '',
-            notes: '',
+            message: '',
         };
 
         const summary = document.getElementById('summary') as HTMLInputElement;
         const summaryAlert = document.getElementById('summary-alert') as HTMLInputElement;
-
+        const description = document.getElementById('description') as HTMLInputElement;
+ 
         if (!summary.value) {
             summary.classList.add('invalid');
             summaryAlert.classList.add('invalid');
@@ -83,10 +82,11 @@ class PushyAdmin {
         summary.classList.remove('invalid');
         summaryAlert.classList.remove('invalid');
 
-        publishingData.summary = summary.value;
+        publishingData.message = summary.value;
 
-        const notes = document.getElementById('notes') as HTMLInputElement;
-        publishingData.notes = notes.value;
+        if (description.value) {
+            publishingData.message += `\n\n${description.value}`;
+        }
 
         const checkboxes = document.getElementsByClassName('selectbox') as HTMLCollectionOf<HTMLInputElement>;
         for (const checkbox of checkboxes) {
@@ -124,6 +124,7 @@ class PushyAdmin {
 
         if (answer) {
             this.setBannerText(`Found ${Object.keys(answer).length} changed items.`, BannerStyle.info);
+            this.updateMenuBadge(answer);
             this.displayItems(answer);
         }
     }
@@ -134,6 +135,19 @@ class PushyAdmin {
         for(const input of inputs) {
             input.value = '';
             input.checked = false;
+        }
+    }
+
+    private updateMenuBadge(changedItems: ChangedItems) {
+        // Find badge for Publish menuitem
+        const allMenuItems = document.querySelectorAll('#admin-menu li');
+        const index = Array.from(allMenuItems).findIndex(node => node.querySelector('em')?.innerHTML == 'Publish');
+        const badge = allMenuItems[index].querySelector('#admin-menu li a .badge.count');
+
+        // If badge is found, update badge
+        if (badge) {
+            const changedItemCount = Object.keys(changedItems).length;
+            badge.innerHTML = changedItemCount > 0 ? changedItemCount.toString() : '';
         }
     }
 

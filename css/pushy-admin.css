@@ -11,10 +11,6 @@
   opacity: 1;
 }
 
-#messages .alert.publish {
-  margin-bottom: 1px;
-}
-
 .pushy th.path,
 .pushy td.path {
   flex: 1;
@@ -26,7 +22,7 @@
   margin-right: 1rem;
 }
 .pushy .message-summary,
-.pushy .message-notes {
+.pushy .message-description {
   margin: 1rem 1.5rem;
 }
 .pushy #summary.invalid {

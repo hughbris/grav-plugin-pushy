@@ -7,6 +7,7 @@ use Exception;
 use Grav\Common\Plugin;
 use Grav\Common\Page\Page;
 use Grav\Common\Uri;
+use Grav\Framework\DI\Container;
 use Grav\Plugin\Pushy\RequestHandler;
 use RocketTheme\Toolbox\Event\Event;
 use Grav\Plugin\Pushy\PushyRepo;
@@ -104,11 +105,20 @@ class PushyPlugin extends Plugin
 		$isInitialized = GitUtils::isGitInitialized();
 		// TODO: test for GitUtils::isGitInstalled()
 		$menuLabel = $isInitialized ? 'Publish' : 'Publishing';
+
+		$count = new Container(['count' => function () { 
+			$itemCount = count($this->repo->statusSelect());
+
+			return $itemCount === 0 ? '' : $itemCount; 
+		}]);
+
 		$options = [
 			'hint' => $isInitialized ? 'Publish' : 'Publication settings',
 			'location' => 'pages',
 			'route' => $isInitialized ? $this->admin_route : "plugins/{$this->name}",
 			'icon' => 'fa-' . ($isInitialized ? $this->grav['plugins']->get($this->name)->blueprints()->get('icon') : 'cog'),
+			'badge' => $count,
+
 			// 'class' => '',
 			// 'data' => [],
 		];
@@ -340,6 +350,7 @@ class PushyPlugin extends Plugin
 		return FALSE;
 	}
 
+	// TODO: this can be static
 	/**
 	 * Provide a HTTP status and JSON response and exit
 	 * @param  int    $http_status   HTTP status number to return

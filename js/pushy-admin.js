@@ -34,11 +34,11 @@ class PushyAdmin {
     getSelectedItems() {
         const publishingData = {
             paths: [],
-            summary: '',
-            notes: '',
+            message: '',
         };
         const summary = document.getElementById('summary');
         const summaryAlert = document.getElementById('summary-alert');
+        const description = document.getElementById('description');
         if (!summary.value) {
             summary.classList.add('invalid');
             summaryAlert.classList.add('invalid');
@@ -46,9 +46,10 @@ class PushyAdmin {
         }
         summary.classList.remove('invalid');
         summaryAlert.classList.remove('invalid');
-        publishingData.summary = summary.value;
-        const notes = document.getElementById('notes');
-        publishingData.notes = notes.value;
+        publishingData.message = summary.value;
+        if (description.value) {
+            publishingData.message += `\n\n${description.value}`;
+        }
         const checkboxes = document.getElementsByClassName('selectbox');
         for (const checkbox of checkboxes) {
             if (checkbox.checked) {
@@ -77,6 +78,7 @@ class PushyAdmin {
         }
         if (answer) {
             this.setBannerText(`Found ${Object.keys(answer).length} changed items.`, BannerStyle.info);
+            this.updateMenuBadge(answer);
             this.displayItems(answer);
         }
     }
@@ -85,6 +87,17 @@ class PushyAdmin {
         for (const input of inputs) {
             input.value = '';
             input.checked = false;
+        }
+    }
+    updateMenuBadge(changedItems) {
+        // Find badge for Publish menuitem
+        const allMenuItems = document.querySelectorAll('#admin-menu li');
+        const index = Array.from(allMenuItems).findIndex(node => { var _a; return ((_a = node.querySelector('em')) === null || _a === void 0 ? void 0 : _a.innerHTML) == 'Publish'; });
+        const badge = allMenuItems[index].querySelector('#admin-menu li a .badge.count');
+        // If badge is found, update badge
+        if (badge) {
+            const changedItemCount = Object.keys(changedItems).length;
+            badge.innerHTML = changedItemCount > 0 ? changedItemCount.toString() : '';
         }
     }
     displayItems(items) {

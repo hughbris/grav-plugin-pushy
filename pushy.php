@@ -4,6 +4,7 @@ namespace Grav\Plugin;
 
 use Composer\Autoload\ClassLoader;
 use Exception;
+use Grav\Common\Assets;
 use Grav\Common\Plugin;
 use Grav\Common\Page\Page;
 use Grav\Common\Uri;
@@ -387,7 +388,10 @@ class PushyPlugin extends Plugin
 		return NULL;
 	}
 
-	public function onAssetsInitialized()
+	/**
+	 * Add requied JavaScript and CSS to page
+	 */
+	public function onAssetsInitialized(): void
 	{
 		if (!$this->isOnRoute()) {
 			return;
@@ -400,8 +404,15 @@ class PushyPlugin extends Plugin
 		$assets->addCss("plugin://pushy/css/pushy-admin.css");
 	}
 
-	protected function isOnRoute()
+	/**
+	 * Check if the request is made by the Pushy plugin.
+	 * 
+	 * @return bool
+	 */
+	protected function isOnRoute(): bool
 	{
+		Assert($this->config !== null, 'Config has not been initialized');
+
 		$currentPath = $this->grav['uri']->path();
 		$publishPath = $this->config->get('plugins.admin.route') . "/$this->admin_route";
 

@@ -10,6 +10,7 @@ class ChangedItem
 
     /** 
      * Parse array of changed item data into ChangedItem
+     * 
      * @param array{working: string, index: string, path: string} $data 
      */
     public function __construct($data)
@@ -17,7 +18,5 @@ class ChangedItem
         foreach ($data as $key => $value) {
             $this->{$key} = $value;
         }
-
-        return $this;
     }
 }

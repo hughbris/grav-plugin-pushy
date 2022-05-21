@@ -10,15 +10,21 @@ use JsonSerializable;
 
 /**
  * Array of urls and their accompanying changedItems
+ * 
+ * @implements \ArrayAccess<string, ChangedItem>
+ * @implements \Iterator<string, ChangedItem>
  */
 class ChangedItems implements ArrayAccess, Countable, Iterator, JsonSerializable
 {
-    /** @var array<string, ChangedItems> */
+    /** @var array<string, ChangedItem> */
     private $container = [];
 
     /** @var int */
     private $index = 0;
 
+    /**
+     * @return array<string, array{working: string, index: string, path: string}>
+     */
     public function toArray(): array
     {
         $changedItems = [];
@@ -27,7 +33,7 @@ class ChangedItems implements ArrayAccess, Countable, Iterator, JsonSerializable
             $changedItems[$url] = (array) $changedItem;
         }
 
-        return $changedItem;
+        return $changedItems;
     }
 
     /**

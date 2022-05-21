@@ -108,7 +108,7 @@ There are lots of moving parts in this pipeline and it pays to set them up and t
 ✔ Test this by checking the Git repository status with your Git client (`git status` or using a front end).
 
 #### You are logged into Admin with sufficient permissions
-🦆 A group permission to allow publishing access is high on the TODO list. For now, log in as a super user.
+🦆 You must be logged in as a user in the group 'publishers'.
 
 ✔ Refresh any Admin page and see if "Publishing" or "Publish" comes up in the side menu.
 

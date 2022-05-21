@@ -114,10 +114,10 @@ class PushyPlugin extends Plugin
 
 		$options = [
 			'hint' => $isInitialized ? 'Publish' : 'Publication settings',
-			'location' => 'pages',
 			'route' => $isInitialized ? $this->admin_route : "plugins/{$this->name}",
 			'icon' => 'fa-' . ($isInitialized ? $this->grav['plugins']->get($this->name)->blueprints()->get('icon') : 'cog'),
 			'badge' => $count,
+			'authorize' => ['admin.publisher'],
 
 			// 'class' => '',
 			// 'data' => [],

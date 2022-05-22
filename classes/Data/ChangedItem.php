@@ -13,7 +13,7 @@ class ChangedItem
      * 
      * @param array{working: string, index: string, path: string} $data 
      */
-    public function __construct($data)
+    public function __construct(array $data)
     {
         foreach ($data as $key => $value) {
             $this->{$key} = $value;

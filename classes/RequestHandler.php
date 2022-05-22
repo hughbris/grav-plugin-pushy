@@ -10,23 +10,19 @@ use Grav\Plugin\Pushy\Data\ChangedItems;
 use Grav\Plugin\Pushy\Data\GitActionResponse;
 
 /**
- * Handles are Pushy requests.
- *
- * @psalm-suppress PropertyNotSetInConstructor
+ * Handles all Pushy requests.
  */
 class RequestHandler
 {
-    private Grav $grav;
-    private Uri $uri;
+    protected Grav $grav;
+    protected Uri $uri;
 
 	protected PushyRepo $repo;
-
-	protected string $admin_route = 'publish';
 
     public function __construct()
     {
         $this->grav = Grav::instance();
-        $this->uri = $this->grav['uri'];
+        $this->uri = $this->grav['uri']; /** @phpstan-ignore-line */
         $this->repo = new PushyRepo();
     }
 

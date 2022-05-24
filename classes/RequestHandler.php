@@ -10,25 +10,19 @@ use Grav\Plugin\Pushy\Data\ChangedItems;
 use Grav\Plugin\Pushy\Data\GitActionResponse;
 
 /**
- * Handles are Pushy requests.
- *
- * @psalm-suppress PropertyNotSetInConstructor
+ * Handles all Pushy requests.
  */
 class RequestHandler
 {
-    private Grav $grav;
-    private Uri $uri;
+    protected Grav $grav;
+    protected Uri $uri;
 
 	protected PushyRepo $repo;
-
-	protected string $admin_route = 'publish';
 
     public function __construct()
     {
         $this->grav = Grav::instance();
-        $this->uri = $this->grav['uri'];
-        $this->config = $this->grav['config'];
-
+        $this->uri = $this->grav['uri']; /** @phpstan-ignore-line */
         $this->repo = new PushyRepo();
     }
 
@@ -52,9 +46,6 @@ class RequestHandler
                 break;
             case 'publishItems':
                 $response = $this->handlePublishTask();
-                break;
-            case 'otherRequest':
-                $response = $this->handleOtherTask();
                 break;
             default:
                 throw new Exception("Unkown request '$task'.");
@@ -94,7 +85,17 @@ class RequestHandler
      */
     private function handlePublishTask(): GitActionResponse
     {
-        $pages = json_decode(file_get_contents('php://input'), true);
+        $taskData = file_get_contents('php://input');
+
+        if ($taskData === false) {
+            return new GitActionResponse(
+                false,
+                "No valid data submitted for task 'Publish'",
+           );
+        }
+
+        /** @var array{paths: string[], message: string} */
+        $pages = json_decode($taskData, true);
 
         try {
             $paths = implode(' ', $pages['paths']);
@@ -111,21 +112,6 @@ class RequestHandler
         return new GitActionResponse(
             true,
             'Items have been published.',
-       );
-    }
-
-    /**
-     * Revert a list changed pages in Git.
-     */
-    private function handleOtherTask(): GitActionResponse
-    {
-        $pages = json_decode(file_get_contents('php://input'), true);
-
-        // TODO Handle other request
-
-        return new GitActionResponse(
-            true,
-            'Request has been processed successfully',
        );
     }
 }

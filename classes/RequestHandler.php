@@ -4,6 +4,8 @@ namespace Grav\Plugin\Pushy;
 
 use Exception;
 use Grav\Common\Grav;
+use Grav\Common\Page\Page;
+use Grav\Common\Page\Pages;
 use Grav\Common\Uri;
 use Grav\Plugin\Pushy\Data\ChangedItem;
 use Grav\Plugin\Pushy\Data\ChangedItems;
@@ -17,7 +19,7 @@ class RequestHandler
     protected Grav $grav;
     protected Uri $uri;
 
-	protected PushyRepo $repo;
+    protected PushyRepo $repo;
 
     public function __construct()
     {
@@ -58,7 +60,7 @@ class RequestHandler
      * Check if request originated from front-end javascript from Pushy.
      */
     private function isPushyRequest(): bool
-    {       
+    {
         return $this->uri->param('pushy') !== false;
     }
 
@@ -67,17 +69,60 @@ class RequestHandler
      */
     private function handleReadTask(): ChangedItems
     {
+        /** @var Pages */
+        $pages = $this->grav['pages'];
+        $pages->enablePages();
+
+        $adminRoute = $this->grav['config']->get('plugins.admin.route');
+
+        $changedItems = new ChangedItems();
+
         $gitIndex = $this->repo->statusSelect();
 
-        $changedPages = new ChangedItems();
-
         if ($gitIndex) {
-            foreach($gitIndex as $index) {
-                $changedPages[$index['path']] = new ChangedItem($index);
+            foreach ($gitIndex as $index) {
+                if ($this->isPage($index)) {
+                    $changedItems[$index['path']] = $this->createChangedItemPage($index, $pages, $adminRoute);
+                } else {
+                    $changedItems[$index['path']] = new ChangedItem($index);
+                }
             }
         }
 
-        return $changedPages;
+        return $changedItems;
+    }
+
+    /**
+     * Check if git item is a Page
+     * 
+     * @param array{working: string, index: string, path: string} $gitItem
+     * @return bool
+     */
+    private function isPage(array $gitItem): bool
+    {
+        return str_starts_with($gitItem['path'], 'pages/');
+    }
+
+    /**
+     * Create ChangedItem for page
+     * 
+     * @param array{working: string, index: string, path: string} $gitItem
+     * @param Pages $pages Contains all pages of site
+     * @param string $adminRoute Url of Admin
+     */
+    private function createChangedItemPage(array $gitItem, Pages $pages, string $adminRoute): ChangedItem
+    {
+        $pageFilePath = GRAV_WEBROOT . DS . GRAV_USER_PATH . DS . $gitItem['path'];
+        $pageFolderPath = implode('/', array_slice(explode('/', $pageFilePath), 0, -1));
+
+        /** @var Page */
+        $page = $pages->get($pageFolderPath);
+
+        $pageTitle = $page->title();
+        $pageAdminUrl = $pages->baseUrl() . "$adminRoute/pages{$page->rawRoute()}";
+        $pageSiteUrl = $page->url();
+
+        return new ChangedItem($gitItem, $pageTitle, $pageAdminUrl, $pageSiteUrl);
     }
 
     /**
@@ -91,7 +136,7 @@ class RequestHandler
             return new GitActionResponse(
                 false,
                 "No valid data submitted for task 'Publish'",
-           );
+            );
         }
 
         /** @var array{paths: string[], message: string} */
@@ -101,17 +146,16 @@ class RequestHandler
             $paths = implode(' ', $pages['paths']);
             $this->repo->stageFiles($paths);
             $this->repo->commit($pages['message']);
-        }
-        catch(Exception $e) {
+        } catch (Exception $e) {
             return new GitActionResponse(
                 false,
                 "There was an error publishing: \"{$e->getMessage()}\"", // FIXME
-           );
+            );
         }
 
         return new GitActionResponse(
             true,
             'Items have been published.',
-       );
+        );
     }
 }

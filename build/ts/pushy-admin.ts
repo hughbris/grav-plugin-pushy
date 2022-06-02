@@ -2,6 +2,9 @@ interface ChangedItem {
     working: string;
     index: string;
     path: string;
+    title: string;
+    adminUrl: string;
+    siteUrl: string;
 }
 
 interface ChangedItems {
@@ -154,8 +157,7 @@ class PushyAdmin {
     private displayItems(items: ChangedItems) {
         this.clearInputs();
 
-        const tableRows = document.getElementById('itemlist') as HTMLElement;
-        tableRows.innerHTML = '';
+        const newBody = document.createElement('body')
 
         Object.keys(items).forEach((path: string, i: number) => {
             const item: ChangedItem = items[path];
@@ -167,12 +169,20 @@ class PushyAdmin {
                 <td class="select">
                     <input id="selectbox${i}" class="selectbox" type="checkbox" value="${item.path}">
                 </td>
-                <td class="path"><label for="selectbox${i}">${item.path}</td>
+                <td class="path"><label for="selectbox${i}">
+                    ${item.title}
+                </td>
+                <td>
+                    <a href="${item.siteUrl}" target="_blank"><i class="fa fa-fw fa-eye"></i></a>
+                    <a href="${item.adminUrl}" target="_blank"><i class="fa fa-fw fa-pencil"></i></a>
+                </td>
             `;
 
-            tableRows.appendChild(itemRow);
+            newBody.appendChild(itemRow);
         });
 
+        const tableRows = document.getElementById('itemlist') as HTMLElement;
+        tableRows.innerHTML = newBody.innerHTML;
 
         const checkboxes = document.getElementsByClassName('selectbox');
         for (const box of checkboxes) {

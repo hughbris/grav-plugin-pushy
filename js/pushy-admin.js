@@ -102,8 +102,7 @@ class PushyAdmin {
     }
     displayItems(items) {
         this.clearInputs();
-        const tableRows = document.getElementById('itemlist');
-        tableRows.innerHTML = '';
+        const newBody = document.createElement('body');
         Object.keys(items).forEach((path, i) => {
             const item = items[path];
             const itemRow = document.createElement('tr');
@@ -112,10 +111,18 @@ class PushyAdmin {
                 <td class="select">
                     <input id="selectbox${i}" class="selectbox" type="checkbox" value="${item.path}">
                 </td>
-                <td class="path"><label for="selectbox${i}">${item.path}</td>
+                <td class="path"><label for="selectbox${i}">
+                    ${item.title}
+                </td>
+                <td>
+                    <a href="${item.siteUrl}" target="_blank"><i class="fa fa-fw fa-eye"></i></a>
+                    <a href="${item.adminUrl}" target="_blank"><i class="fa fa-fw fa-pencil"></i></a>
+                </td>
             `;
-            tableRows.appendChild(itemRow);
+            newBody.appendChild(itemRow);
         });
+        const tableRows = document.getElementById('itemlist');
+        tableRows.innerHTML = newBody.innerHTML;
         const checkboxes = document.getElementsByClassName('selectbox');
         for (const box of checkboxes) {
             box.addEventListener('click', () => {

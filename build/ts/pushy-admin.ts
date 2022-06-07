@@ -2,6 +2,7 @@ interface ChangedItem {
     working: string;
     index: string;
     path: string;
+    isPage: boolean;
     title: string;
     adminUrl: string;
     siteUrl: string;
@@ -162,21 +163,38 @@ class PushyAdmin {
         Object.keys(items).forEach((path: string, i: number) => {
             const item: ChangedItem = items[path];
 
-            const itemRow = document.createElement('tr');
-            itemRow.innerHTML = '';
+            let innerHTML = '';
 
-            itemRow.innerHTML = `
+            innerHTML = `
                 <td class="select">
                     <input id="selectbox${i}" class="selectbox" type="checkbox" value="${item.path}">
                 </td>
                 <td class="path"><label for="selectbox${i}">
-                    ${item.title}
+                `;
+            
+            if (item.isPage) {
+                innerHTML += 
+                    `
+                    <a href="${item.siteUrl}" target="_blank">
+                        ${item.title}
+                        <i class="fa fa-external-link"></i>
+                    </a>
+                    `;
+
+            } else {
+                innerHTML += item.path;
+            }
+
+            innerHTML +=
+                `
                 </td>
                 <td>
-                    <a href="${item.siteUrl}" target="_blank"><i class="fa fa-fw fa-eye"></i></a>
                     <a href="${item.adminUrl}" target="_blank"><i class="fa fa-fw fa-pencil"></i></a>
                 </td>
-            `;
+                `;
+
+            const itemRow = document.createElement('tr');
+            itemRow.innerHTML = innerHTML;
 
             newBody.appendChild(itemRow);
         });

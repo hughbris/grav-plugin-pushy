@@ -51,5 +51,9 @@
   color: red;
   font-size: 1.25rem;
 }
+.pushy i.fa.fa-external-link {
+  font-size: 0.7rem;
+  vertical-align: text-top;
+}
 
 /*# sourceMappingURL=pushy-admin.css.map */

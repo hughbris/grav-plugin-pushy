@@ -77,14 +77,14 @@ class RequestHandler
 
         $changedItems = new ChangedItems();
 
-        $gitIndex = $this->repo->statusSelect();
+        $gitItems = $this->repo->statusSelect();
 
-        if ($gitIndex) {
-            foreach ($gitIndex as $index) {
-                if ($this->isPage($index)) {
-                    $changedItems[$index['path']] = $this->createChangedItemPage($index, $pages, $adminRoute);
+        if ($gitItems) {
+            foreach ($gitItems as $item) {
+                if ($this->isPage($item)) {
+                    $changedItems[$item['path']] = $this->addChangedPage($item, $pages, $adminRoute);
                 } else {
-                    $changedItems[$index['path']] = new ChangedItem($index);
+                    $changedItems[$item['path']] = $this->addChangedOther($item);
                 }
             }
         }
@@ -110,7 +110,7 @@ class RequestHandler
      * @param Pages $pages Contains all pages of site
      * @param string $adminRoute Url of Admin
      */
-    private function createChangedItemPage(array $gitItem, Pages $pages, string $adminRoute): ChangedItem
+    private function addChangedPage(array $gitItem, Pages $pages, string $adminRoute): ChangedItem
     {
         $pageFilePath = GRAV_WEBROOT . DS . GRAV_USER_PATH . DS . $gitItem['path'];
         $pageFolderPath = implode('/', array_slice(explode('/', $pageFilePath), 0, -1));
@@ -118,11 +118,25 @@ class RequestHandler
         /** @var Page */
         $page = $pages->get($pageFolderPath);
 
+        $isPage = true;
         $pageTitle = $page->title();
         $pageAdminUrl = $pages->baseUrl() . "$adminRoute/pages{$page->rawRoute()}";
         $pageSiteUrl = $page->url();
 
-        return new ChangedItem($gitItem, $pageTitle, $pageAdminUrl, $pageSiteUrl);
+        return new ChangedItem($gitItem, $isPage, $pageTitle, $pageAdminUrl, $pageSiteUrl);
+    }
+
+    /**
+     * Create ChangedItem for anything other then Page
+     * 
+     * @param array{working: string, index: string, path: string} $gitItem
+     */
+    private function addChangedOther(array $gitItem): ChangedItem
+    {
+        $itemFilePath = $gitItem['path'];
+        $itemAdminUrl = preg_replace("/^(.*)\.[^.]+$/", "$1", $itemFilePath);
+
+        return new ChangedItem($gitItem, false, '', $itemAdminUrl);
     }
 
     /**

@@ -113,6 +113,7 @@ class RequestHandler
     private function addChangedPage(array $gitItem, Pages $pages, string $adminRoute): ChangedItem
     {
         $pageFilePath = GRAV_WEBROOT . DS . GRAV_USER_PATH . DS . $gitItem['path'];
+        // Remove filename from path
         $pageFolderPath = implode('/', array_slice(explode('/', $pageFilePath), 0, -1));
 
         /** @var Page */
@@ -133,7 +134,14 @@ class RequestHandler
      */
     private function addChangedOther(array $gitItem): ChangedItem
     {
-        $itemFilePath = $gitItem['path'];
+        if (str_starts_with($gitItem['path'], 'config/plugins')) {
+            // Remove '/config'
+            $itemFilePath = substr($gitItem['path'], 7);
+        } else {
+            $itemFilePath = $gitItem['path'];
+        }
+
+        // Remove file extension
         $itemAdminUrl = preg_replace("/^(.*)\.[^.]+$/", "$1", $itemFilePath);
 
         return new ChangedItem($gitItem, false, '', $itemAdminUrl);

@@ -4,6 +4,7 @@ namespace Grav\Plugin\Pushy;
 
 use Exception;
 use Grav\Common\Grav;
+use Grav\Common\Inflector;
 use Grav\Common\Page\Page;
 use Grav\Common\Page\Pages;
 use Grav\Common\Uri;
@@ -122,7 +123,13 @@ class RequestHandler
         $isPage = true;
         $pageTitle = $page->title();
         $pageAdminUrl = $pages->baseUrl() . "$adminRoute/pages{$page->rawRoute()}";
-        $pageSiteUrl = $page->url();
+
+        if ($page->isModule()) {
+            $anchor = Inflector::hyphenize($page->menu());
+            $pageSiteUrl = implode('/', array_slice(explode('/', $page->url()), 0, -1)) . "/#$anchor";
+        } else {
+            $pageSiteUrl = $page->url();
+        }
 
         return new ChangedItem($gitItem, $isPage, $pageTitle, $pageAdminUrl, $pageSiteUrl);
     }

@@ -128,7 +128,7 @@ class PushyAdmin {
                 `
                 </td>
                 <td>
-                    <a href="${item.adminUrl}" target="_blank"><i class="fa fa-fw fa-pencil"></i></a>
+                    <a href="${item.adminUrl}"><i class="fa fa-fw fa-pencil"></i></a>
                 </td>
                 `;
             const itemRow = document.createElement('tr');

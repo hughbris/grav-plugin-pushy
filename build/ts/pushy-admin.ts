@@ -1,8 +1,15 @@
+enum GitItemType {
+    Page = 'page',
+    Module = 'module',
+    Config = 'config',
+    Other = 'other',
+}
+
 interface ChangedItem {
     working: string;
     index: string;
     path: string;
-    isPage: boolean;
+    type: GitItemType;
     title: string;
     adminUrl: string;
     siteUrl: string;
@@ -75,7 +82,7 @@ class PushyAdmin {
         const summary = document.getElementById('summary') as HTMLInputElement;
         const summaryAlert = document.getElementById('summary-alert') as HTMLInputElement;
         const description = document.getElementById('description') as HTMLInputElement;
- 
+
         if (!summary.value) {
             summary.classList.add('invalid');
             summaryAlert.classList.add('invalid');
@@ -136,7 +143,7 @@ class PushyAdmin {
     private clearInputs() {
         const inputs = document.querySelectorAll<HTMLInputElement>('input, textarea');
 
-        for(const input of inputs) {
+        for (const input of inputs) {
             input.value = '';
             input.checked = false;
         }
@@ -171,27 +178,41 @@ class PushyAdmin {
                 </td>
                 <td class="path"><label for="selectbox${i}">
                 `;
-            
-            if (item.isPage) {
-                innerHTML += 
+
+            if (item.type == GitItemType.Page) {
+                innerHTML +=
                     `
                     <a href="${item.siteUrl}" target="_blank">
                         ${item.title}
                         <i class="fa fa-external-link"></i>
                     </a>
                     `;
-
+            } else if (item.type == GitItemType.Module) {
+                innerHTML += item.title;
+            } else if (item.type == GitItemType.Config) {
+                innerHTML += item.path;
+            } else if (item.type == GitItemType.Other && item.siteUrl) {
+                innerHTML +=
+                    `
+                    <a href="${item.siteUrl}" target="_blank">
+                        ${item.path}
+                        <i class="fa fa-external-link"></i>
+                    </a>
+                    `;
             } else {
                 innerHTML += item.path;
             }
 
-            innerHTML +=
-                `
+            // Set icon for editing item
+            if (item.adminUrl) {
+                innerHTML +=
+                    `
                 </td>
                 <td>
                     <a href="${item.adminUrl}"><i class="fa fa-fw fa-pencil"></i></a>
                 </td>
                 `;
+            }
 
             const itemRow = document.createElement('tr');
             itemRow.innerHTML = innerHTML;

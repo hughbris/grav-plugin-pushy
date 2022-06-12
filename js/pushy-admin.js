@@ -1,4 +1,11 @@
 "use strict";
+var GitItemType;
+(function (GitItemType) {
+    GitItemType["Page"] = "page";
+    GitItemType["Module"] = "module";
+    GitItemType["Config"] = "config";
+    GitItemType["Other"] = "other";
+})(GitItemType || (GitItemType = {}));
 var BannerStyle;
 (function (BannerStyle) {
     BannerStyle[BannerStyle["info"] = 0] = "info";
@@ -112,7 +119,7 @@ class PushyAdmin {
                 </td>
                 <td class="path"><label for="selectbox${i}">
                 `;
-            if (item.isPage) {
+            if (item.type == GitItemType.Page) {
                 innerHTML +=
                     `
                     <a href="${item.siteUrl}" target="_blank">
@@ -121,16 +128,34 @@ class PushyAdmin {
                     </a>
                     `;
             }
+            else if (item.type == GitItemType.Module) {
+                innerHTML += item.title;
+            }
+            else if (item.type == GitItemType.Config) {
+                innerHTML += item.path;
+            }
+            else if (item.type == GitItemType.Other && item.siteUrl) {
+                innerHTML +=
+                    `
+                    <a href="${item.siteUrl}" target="_blank">
+                        ${item.path}
+                        <i class="fa fa-external-link"></i>
+                    </a>
+                    `;
+            }
             else {
                 innerHTML += item.path;
             }
-            innerHTML +=
-                `
+            // Set icon for editing item
+            if (item.adminUrl) {
+                innerHTML +=
+                    `
                 </td>
                 <td>
                     <a href="${item.adminUrl}"><i class="fa fa-fw fa-pencil"></i></a>
                 </td>
                 `;
+            }
             const itemRow = document.createElement('tr');
             itemRow.innerHTML = innerHTML;
             newBody.appendChild(itemRow);

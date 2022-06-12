@@ -4,13 +4,20 @@ namespace Grav\Plugin\Pushy;
 
 use Exception;
 use Grav\Common\Grav;
-use Grav\Common\Inflector;
 use Grav\Common\Page\Page;
 use Grav\Common\Page\Pages;
 use Grav\Common\Uri;
 use Grav\Plugin\Pushy\Data\ChangedItem;
 use Grav\Plugin\Pushy\Data\ChangedItems;
 use Grav\Plugin\Pushy\Data\GitActionResponse;
+
+abstract class GitItemType
+{
+    const Page = 'page';
+    const Module = 'module';
+    const Config = 'config';
+    const Other = 'other';
+}
 
 /**
  * Handles all Pushy requests.
@@ -84,8 +91,10 @@ class RequestHandler
             foreach ($gitItems as $item) {
                 if ($this->isPage($item)) {
                     $changedItems[$item['path']] = $this->addChangedPage($item, $pages, $adminRoute);
+                } elseif ($this->isConfig($item)) {
+                    $changedItems[$item['path']] = $this->addChangedConfig($item);
                 } else {
-                    $changedItems[$item['path']] = $this->addChangedOther($item);
+                    $changedItems[$item['path']] = $this->addChangedOther($item, $pages->baseUrl());
                 }
             }
         }
@@ -101,7 +110,18 @@ class RequestHandler
      */
     private function isPage(array $gitItem): bool
     {
-        return str_starts_with($gitItem['path'], 'pages/');
+        return str_starts_with($gitItem['path'], 'pages/') && str_ends_with($gitItem['path'], '.md');
+    }
+
+    /**
+     * Check if git item is a Config file
+     * 
+     * @param array{working: string, index: string, path: string} $gitItem
+     * @return bool
+     */
+    private function isConfig(array $gitItem): bool
+    {
+        return str_starts_with($gitItem['path'], 'config/');
     }
 
     /**
@@ -120,18 +140,18 @@ class RequestHandler
         /** @var Page */
         $page = $pages->get($pageFolderPath);
 
-        $isPage = true;
         $pageTitle = $page->title();
         $pageAdminUrl = $pages->baseUrl() . "$adminRoute/pages{$page->rawRoute()}";
+        $pageSiteUrl = $page->url();
+        $type = GitItemType::Page;
 
         if ($page->isModule()) {
-            $anchor = Inflector::hyphenize($page->menu());
-            $pageSiteUrl = implode('/', array_slice(explode('/', $page->url()), 0, -1)) . "/#$anchor";
-        } else {
-            $pageSiteUrl = $page->url();
+            $pageTitle .= ' (module)';
+            $pageSiteUrl = '';
+            $type = GitItemType::Module;
         }
 
-        return new ChangedItem($gitItem, $isPage, $pageTitle, $pageAdminUrl, $pageSiteUrl);
+        return new ChangedItem($gitItem, $type, $pageTitle, $pageAdminUrl, $pageSiteUrl);
     }
 
     /**
@@ -139,7 +159,7 @@ class RequestHandler
      * 
      * @param array{working: string, index: string, path: string} $gitItem
      */
-    private function addChangedOther(array $gitItem): ChangedItem
+    private function addChangedConfig(array $gitItem): ChangedItem
     {
         if (str_starts_with($gitItem['path'], 'config/plugins')) {
             // Remove '/config'
@@ -151,7 +171,27 @@ class RequestHandler
         // Remove file extension
         $itemAdminUrl = preg_replace("/^(.*)\.[^.]+$/", "$1", $itemFilePath);
 
-        return new ChangedItem($gitItem, false, '', $itemAdminUrl);
+        return new ChangedItem($gitItem, GitItemType::Config, '', $itemAdminUrl);
+    }
+
+    /**
+     * Create ChangedItem for non specified type
+     * 
+     * @param array{working: string, index: string, path: string} $gitItem
+     */
+    private function addChangedOther(array $gitItem, string $siteBaseUrl): ChangedItem
+    {
+        $pathParts = explode('.', $gitItem['path']);
+        $fileType = array_pop($pathParts);
+
+        $siteUrl = '';
+
+        // TODO: Should be a dynamic check + handle other media types
+        if (in_array($fileType, ['jpg', 'jpe', 'jpeg', 'png', 'webp', 'avif'])) {
+            $siteUrl = "$siteBaseUrl/user/${gitItem['path']}";
+        }
+
+        return new ChangedItem($gitItem, GitItemType::Other, '', '', $siteUrl);
     }
 
     /**

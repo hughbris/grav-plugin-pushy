@@ -141,10 +141,14 @@ class PushyPlugin extends Plugin
 		$isInitialized = GitUtils::isGitInitialized();
 		// TODO: test for GitUtils::isGitInstalled() - make a wrapper for these two funcs since we're checking them twice now
 
+		$twig = $this->grav['twig'];
+
 		if ($isInitialized && $route == $publish_path) {
 			$twig = $this->grav['twig'];
 			$twig->twig_vars['git_index'] = $this->repo->statusSelect(); # TRUE, $env='index', $select='MTDRCA');
 		}
+
+		$twig->twig_vars['isAuthorised'] = $this->grav['user']->authorize('admin.publisher');
 	}
 
 	public function serveHooks(): void {

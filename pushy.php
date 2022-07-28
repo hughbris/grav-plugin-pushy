@@ -60,6 +60,7 @@ class PushyPlugin extends Plugin
 	 */
 	public function onPluginsInitialized(): void
 	{
+		if ($this->isAdmin()) {
 		$this->init();
 
 		if ($this->isAdmin()) {

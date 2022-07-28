@@ -64,9 +64,8 @@ class PushyPlugin extends Plugin
 	public function onPluginsInitialized(): void
 	{
 		if ($this->isAdmin()) {
-		$this->init();
+			$this->init();
 
-		if ($this->isAdmin()) {
 			if ($this->isOnRoute()) {
 				/** @var RequestHandler */
 				$requestHandler = new RequestHandler();
@@ -144,7 +143,6 @@ class PushyPlugin extends Plugin
 		$twig = $this->grav['twig'];
 
 		if ($isInitialized && $route == $publish_path) {
-			$twig = $this->grav['twig'];
 			$twig->twig_vars['git_index'] = $this->repo->statusSelect(); # TRUE, $env='index', $select='MTDRCA');
 		}
 
@@ -397,7 +395,7 @@ class PushyPlugin extends Plugin
 
 	public function onAssetsInitialized()
 	{
-		if (!$this->isOnRoute()) {
+		if (!$this->isOnRoute() || !$this->grav['user']->authorize('admin.publisher')) {
 			return;
 		}
 

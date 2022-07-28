@@ -14,3 +14,5 @@ webhooks:
       # conditions: # optionally add some conditions on when to trigger the custom job
         # branch: # only on this branch of the commit
         # committer: # email of the git committer
+authorization:
+  groups: [publishers]  # Create group(s) with permissions to manage Pushy

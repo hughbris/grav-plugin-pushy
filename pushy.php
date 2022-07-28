@@ -12,6 +12,7 @@ use Grav\Plugin\Pushy\RequestHandler;
 use RocketTheme\Toolbox\Event\Event;
 use Grav\Plugin\Pushy\PushyRepo;
 use Grav\Plugin\Pushy\GitUtils;
+use Grav\Plugin\Pushy\GroupHandler;
 
 /**
  * Class PushyPlugin
@@ -53,6 +54,8 @@ class PushyPlugin extends Plugin
 	public function init(): void
 	{
 		$this->repo = new PushyRepo();
+
+		$groupHandler = (new GroupHandler())->createGroups();
 	}
 
 	/**

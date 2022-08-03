@@ -7,12 +7,13 @@ use Exception;
 use Grav\Common\Plugin;
 use Grav\Common\Page\Page;
 use Grav\Common\Uri;
+use Grav\Events\PermissionsRegisterEvent;
+use Grav\Framework\Acl\PermissionsReader;
 use Grav\Framework\DI\Container;
 use Grav\Plugin\Pushy\RequestHandler;
 use RocketTheme\Toolbox\Event\Event;
 use Grav\Plugin\Pushy\PushyRepo;
 use Grav\Plugin\Pushy\GitUtils;
-use Grav\Plugin\Pushy\GroupHandler;
 
 /**
  * Class PushyPlugin
@@ -54,8 +55,6 @@ class PushyPlugin extends Plugin
 	public function init(): void
 	{
 		$this->repo = new PushyRepo();
-
-		$groupHandler = (new GroupHandler())->createGroups();
 	}
 
 	/**
@@ -82,6 +81,7 @@ class PushyPlugin extends Plugin
 				'onAdminMenu' => ['showPublishingMenu', 0],
 				'onTwigSiteVariables' => ['setTwigSiteVariables', 0],
 				'onAssetsInitialized' => ['onAssetsInitialized', 0],
+				PermissionsRegisterEvent::class => ['onRegisterPermissions', 0],
 			]);
 		} else {
 			$this->enable([
@@ -99,6 +99,17 @@ class PushyPlugin extends Plugin
 		$paths[] = __DIR__ . DS . 'admin/templates';
 		$event['paths'] = $paths;
 	}
+
+	/**
+	 * Register new permission to list of permissions for Account and Group
+	 */
+	public function onRegisterPermissions(PermissionsRegisterEvent $event): void
+    {
+        $actions = PermissionsReader::fromYaml("plugin://{$this->name}/permissions.yaml");
+
+        $permissions = $event->permissions;
+        $permissions->addActions($actions);
+    }
 
 	/**
 	 * Show the publishing menu item(s) in Admin

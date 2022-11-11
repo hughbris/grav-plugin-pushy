@@ -1,0 +1,3 @@
+actions:
+  admin.publisher:
+    label: Publish pages

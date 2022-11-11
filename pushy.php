@@ -8,6 +8,8 @@ use Grav\Common\Assets;
 use Grav\Common\Plugin;
 use Grav\Common\Page\Page;
 use Grav\Common\Uri;
+use Grav\Events\PermissionsRegisterEvent;
+use Grav\Framework\Acl\PermissionsReader;
 use Grav\Framework\DI\Container;
 use Grav\Plugin\Pushy\RequestHandler;
 use RocketTheme\Toolbox\Event\Event;
@@ -61,9 +63,9 @@ class PushyPlugin extends Plugin
 	 */
 	public function onPluginsInitialized(): void
 	{
-		$this->init();
-
 		if ($this->isAdmin()) {
+			$this->init();
+
 			if ($this->isOnRoute()) {
 				/** @var RequestHandler */
 				$requestHandler = new RequestHandler();
@@ -80,6 +82,7 @@ class PushyPlugin extends Plugin
 				'onAdminMenu' => ['showPublishingMenu', 0],
 				'onTwigSiteVariables' => ['setTwigSiteVariables', 0],
 				'onAssetsInitialized' => ['onAssetsInitialized', 0],
+				PermissionsRegisterEvent::class => ['onRegisterPermissions', 0],
 			]);
 		} else {
 			$this->enable([
@@ -99,6 +102,17 @@ class PushyPlugin extends Plugin
 	}
 
 	/**
+	 * Register new permission to list of permissions for Account and Group
+	 */
+	public function onRegisterPermissions(PermissionsRegisterEvent $event): void
+    {
+        $actions = PermissionsReader::fromYaml("plugin://{$this->name}/permissions.yaml");
+
+        $permissions = $event->permissions;
+        $permissions->addActions($actions);
+    }
+
+	/**
 	 * Show the publishing menu item(s) in Admin
 	 */
 	public function showPublishingMenu(): void
@@ -115,10 +129,10 @@ class PushyPlugin extends Plugin
 
 		$options = [
 			'hint' => $isInitialized ? 'Publish' : 'Publication settings',
-			'location' => 'pages',
 			'route' => $isInitialized ? $this->admin_route : "plugins/{$this->name}",
 			'icon' => 'fa-' . ($isInitialized ? $this->grav['plugins']->get($this->name)->blueprints()->get('icon') : 'cog'),
 			'badge' => $count,
+			'authorize' => ['admin.publisher'],
 
 			// 'class' => '',
 			// 'data' => [],
@@ -138,10 +152,13 @@ class PushyPlugin extends Plugin
 		$isInitialized = GitUtils::isGitInitialized();
 		// TODO: test for GitUtils::isGitInstalled() - make a wrapper for these two funcs since we're checking them twice now
 
+		$twig = $this->grav['twig'];
+
 		if ($isInitialized && $route == $publish_path) {
-			$twig = $this->grav['twig'];
 			$twig->twig_vars['git_index'] = $this->repo->statusSelect(); # TRUE, $env='index', $select='MTDRCA');
 		}
+
+		$twig->twig_vars['isAuthorised'] = $this->grav['user']->authorize('admin.publisher');
 	}
 
 	public function serveHooks(): void {
@@ -393,7 +410,7 @@ class PushyPlugin extends Plugin
 	 */
 	public function onAssetsInitialized(): void
 	{
-		if (!$this->isOnRoute()) {
+		if (!$this->isOnRoute() || !$this->grav['user']->authorize('admin.publisher')) {
 			return;
 		}
 

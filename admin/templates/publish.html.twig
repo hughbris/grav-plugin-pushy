@@ -5,10 +5,13 @@
 {% endif %}
 
 {% block titlebar %}
-	<div class="button-bar">
-		<a class="button" id="publish">
-			<i class="fa fa-fw fa-upload"></i>Publish</a>
-	</div>
+	{% if isAuthorised %}
+		<div class="button-bar">
+			<a class="button" id="publish">
+				<i class="fa fa-fw fa-upload"></i>Publish</a>
+		</div>
+	{% endif %}
+
 	<h1>
 		<i class="fa fa-fw fa-upload"></i>
 		Publishing
@@ -16,8 +19,9 @@
 {% endblock %}
 
 {% block content %}
-	<div class="pushy">
-		<h1>List of changed items</h1>
+	{% if isAuthorised %}
+		<div class="pushy">
+			<h1>List of changed items</h1>
 
 		<table>
 			<thead>
@@ -32,11 +36,10 @@
 			<input id="summary" type="text">
 			<div id="summary-alert" class="">Summary should be provided</div>
 		</div>
-		<div class="message-description">
-			<label for="description">Optional description:</label>
-			<textarea id="description" rows="3"></textarea>
+	{% else %}
+		<div id="messages" class="top-notifications-container default-box-shadow">
+			<div class="single-notification info alert hidden" data-gpm-grav=""></div>
+			<div class="error alert">You have insufficient permissions for Publishing.</div>
 		</div>
-		</div>
-
-	</div>
+	{% endif %}
 {% endblock %}

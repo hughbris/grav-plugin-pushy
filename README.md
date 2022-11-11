@@ -166,7 +166,7 @@ If the path to your Grav `user` directory differs, adapt the `cd` line. Now set 
 cd /var/www/grav/user
 git fetch
 ```
-Change `fetch` to a bolder operation that requires private access if you feel it. Make sure your file is executable.
+Change `fetch` to a bolder operation that requires private access if you feel it. Make sure your file is executable. See the note above about using a Private Access Token (PAT) if you are in an isolated environment.
 
 ✔ From the `user` folder, as the webserver user, at the command prompt enter `.git/hooks/test-ops.sh`. You should see only happy messages or nothing at all.
 
@@ -241,19 +241,12 @@ Optionally add a webhook secret and some conditions after a successful test. You
 
 ## To Do / Ideas
 
-- [ ] ~~Switch the Save page button label to 'Save Draft' and stage the edit to the git index on save - this allows git edits to be attributed to the current user reliably, but seems messy with unstaging some changes especially for renames + edits~~
-- [X] ~~Allow user selection of changes to commit/publish with checkboxes - possibly even an equivalent to `git add -p`~~ _[8a619df](https://github.com/hughbris/grav-plugin-pushy/commit/e2a27c961349f9325ace9fb8def3c6779e97e1fa) or similar_
-- [x] ~~Show newly created files within new folders to be clearer - Git currently only shows folders and this could be confusing for new pages (is there a Git option for this??)~~ _`-u` made this easily solved_
-- [ ] ~~Remove folder prefixes from previews of changes if possible - ideally page titles~~ [#10](https://github.com/hughbris/grav-plugin-pushy/issues/10)
-- [ ] Allow pull updates to sync with a branch on origin (..auth required)
-- [ ] ~~Add an authorisation permission to publish~~ [#7](https://github.com/hughbris/grav-plugin-pushy/issues/7)
-- [ ] ~~Provide a "wizard" to generate githook code that can be copied, with instructions~~ [#18](https://github.com/hughbris/grav-plugin-pushy/issues/18)
+The best of these are now in [issues](ttps://github.com/hughbris/grav-plugin-pushy/issues).
+
+- [ ] Allow pull updates to sync with a branch on origin (..auth required?)
 - [ ] Potentially move the webhooks to a separate plugin
-- [x] ~~Route and respond to webhooks~~ _completed circa [ab2468f](https://github.com/hughbris/grav-plugin-pushy/commit/ab2468fef77b82058a914ad79a0ed3d567813961)_
-- [x] ~~Perhaps allow webhook URLs to map to _(non-)_ scheduled tasks to be triggered in response~~ _completed circa [407569c](https://github.com/hughbris/grav-plugin-pushy/commit/407569ce3d985846e03734e4c2bf24f6a1470bbd)_
 - [ ] CLI, including local webhook creation and remote webhook creation using the Github (etc.) API
 - [ ] Add on-screen instructions for installing Git PHP library using composer if not installed
 - [ ] Use Github's webhook API to test the response from invoking server webhooks, then notify user
 - [ ] Break this README out into smaller docs, it's going to get too involved
 - [ ] Find a good, safe location to recommend placing the executable merge (etc) scripts for on-demand invocation by Grav scheduler
-- [X] ~~Break these items out into proper GH issues~~

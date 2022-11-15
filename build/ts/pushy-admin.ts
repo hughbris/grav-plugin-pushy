@@ -81,7 +81,6 @@ class PushyAdmin {
 
         const summary = document.getElementById('summary') as HTMLInputElement;
         const summaryAlert = document.getElementById('summary-alert') as HTMLInputElement;
-        const description = document.getElementById('description') as HTMLInputElement;
 
         if (!summary.value) {
             summary.classList.add('invalid');
@@ -94,10 +93,6 @@ class PushyAdmin {
         summaryAlert.classList.remove('invalid');
 
         publishingData.message = summary.value;
-
-        if (description.value) {
-            publishingData.message += `\n\n${description.value}`;
-        }
 
         const checkboxes = document.getElementsByClassName('selectbox') as HTMLCollectionOf<HTMLInputElement>;
         for (const checkbox of checkboxes) {

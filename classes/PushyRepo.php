@@ -15,17 +15,10 @@ class PushyRepo extends GitRepository {
 	/** @var array */
 	protected $config;
 
-	/** @var string */
-	protected $repositoryPath;
-
 	public function __construct() {
+		parent::__construct(USER_DIR, $this->runner);
 		$this->grav = Grav::instance();
-		$this->config = $this->grav['config']->get('plugins.pushy');
-		$this->repositoryPath = USER_DIR;
-
-
-
-		parent::__construct($this->repositoryPath, $this->runner);
+		$this->setConfig($this->grav['config']->get('plugins.pushy'));
 	}
 
 	/**
@@ -41,7 +34,7 @@ class PushyRepo extends GitRepository {
 	 * @return bool
 	 * @throws GitException
 	 */
-	// adapted from \CzProject\GitPhp\GitRepository::hasChanges() but that does not provide a pathspec argument
+	/* overloads \CzProject\GitPhp\GitRepository::hasChanges() which does not provide a pathspec argument */
 	public function hasChanges($folders=[])	{
 		// Make sure the `git status` gets a refreshed look at the working tree.
 		$this->run('update-index', '-q', '--refresh');
@@ -60,9 +53,9 @@ class PushyRepo extends GitRepository {
 	 * @return array
 	 */
 	private function statusLines($filter=TRUE) {
-		$command = 'status -u --find-renames --porcelain';
+		$command = explode(' ', 'status -u --find-renames --porcelain');
 		if ($filter) {
-			$command .= ' ' . implode(' ', $this->config['folders']);
+			$command = array_merge($command, $this->config['folders']);
 		}
 		return $this->execute($command);
 	}
@@ -125,8 +118,8 @@ class PushyRepo extends GitRepository {
 			$files = $statusListing;
 		}
 		if (!empty($files)) {
-			$command = 'add --all';
-			$this->execute("$command $files");
+			$command = array_merge(['add', '--all'], explode(' ', $files));
+			$this->execute($command);
 		}
 	}
 
@@ -134,7 +127,7 @@ class PushyRepo extends GitRepository {
 	 * @param string $message
 	 * @return string[]
 	 */
-	public function commit($message) {
+	public function commit($message, $options = NULL) {
 
 		if(!isset($this->grav['session'])) {
 			return; // FIXME
@@ -148,62 +141,7 @@ class PushyRepo extends GitRepository {
 		$author = $user . ' <' . $email . '>';
 		$authorFlag = '--author="' . $author . '"';
 
-		return $this->execute("commit $authorFlag -m " . escapeshellarg($message));
-	}
-
-	/**
-	 * @param string $command
-	 * @param bool $quiet
-	 * @return string[]
-	 */
-	public function execute($command, $quiet=FALSE) {
-		try {
-			$bin = GitUtils::getGitBinary($this->getGitConfig('bin', 'git'));
-			/** @var string $version */
-			$version = GitUtils::isGitInstalled(true);
-
-			// -C <path> supported from 1.8.5 and above
-			if (version_compare($version, '1.8.5', '>=')) {
-				$command = $bin . ' -C ' . escapeshellarg($this->repositoryPath) . ' ' . $command;
-			}
-			else {
-				$command = 'cd ' . $this->repositoryPath . ' && ' . $bin . ' ' . $command;
-			}
-
-			$command .= ' 2>&1';
-
-			if (DIRECTORY_SEPARATOR === '/') {
-				$command = 'LC_ALL=C ' . $command;
-			}
-
-			if ($this->getConfig('logging', false)) {
-				$this->grav['log']->notice('pushy[command]: ' . $command);
-				exec($command, $output, $returnValue);
-				$output_string = is_array($output) ? json_encode($output) : $output;
-				$this->grav['log']->notice('pushy[output]: ' . $output_string);
-			}
-			else {
-				exec($command, $output, $returnValue);
-			}
-
-			if ($returnValue !== 0 && $returnValue !== 5 && !$quiet) {
-				throw new \RuntimeException(implode("\r\n", $output));
-			}
-
-			return $output;
-		}
-		catch (\RuntimeException $e) {
-			$message = $e->getMessage();
-
-			// handle scary messages - TODO?
-			/*
-			if (Utils::contains($message, 'some scary part of a message')) {
-				$message = 'BLABLA';
-			}
-			*/
-
-			throw new \RuntimeException($message);
-		}
+		parent::commit($message, array_merge([$authorFlag], is_null($options) ? [] : $options));
 	}
 
 	/**

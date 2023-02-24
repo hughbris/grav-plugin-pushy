@@ -5,9 +5,9 @@ use Grav\Common\Grav;
 use Grav\Common\Plugin;
 use Grav\Common\Utils;
 use http\Exception\RuntimeException;
-use CzProject\GitPhp\Git;
+use CzProject\GitPhp\GitRepository;
 
-class PushyRepo extends Git {
+class PushyRepo extends GitRepository {
 
 	/** @var Grav */
 	protected $grav;
@@ -23,10 +23,9 @@ class PushyRepo extends Git {
 		$this->config = $this->grav['config']->get('plugins.pushy');
 		$this->repositoryPath = USER_DIR;
 
-		$this->git = new Git;
-		$this->repo = $this->git->open($this->repositoryPath);
 
-		parent::__construct();
+
+		parent::__construct($this->repositoryPath, $this->runner);
 	}
 
 	/**
@@ -37,19 +36,24 @@ class PushyRepo extends Git {
 	}
 
 	/**
+	 * Are there changes?
+	 * `git status` + magic
+	 * @return bool
+	 * @throws GitException
+	 */
+	// adapted from \CzProject\GitPhp\GitRepository::hasChanges() but that does not provide a pathspec argument
+	public function hasChanges($folders=[])	{
+		// Make sure the `git status` gets a refreshed look at the working tree.
+		$this->run('update-index', '-q', '--refresh');
+		$result = $this->run('status', implode(' ', $folders), '--porcelain');
+		return $result->hasOutput();
+	}
+
+	/**
 	 * @return bool
 	 */
 	public function hasChangesToCommit() {
-		$folders = $this->config['folders'];
-
-		// adapted from \CzProject\GitPhp\GitRepository::hasChanges() but that does not provide a pathspec argument
-		// return $this->repo->hasChanges();
-
-		// Make sure the `git status` gets a refreshed look at the working tree.
-		$this->repo->execute('update-index', '-q', '--refresh');
-		$result = $this->repo->execute('status', implode(' ', $this->config['folders']), '--porcelain');
-		return !empty($result);
-
+		return $this->hasChanges($this->config['folders']);
 	}
 
 	/**

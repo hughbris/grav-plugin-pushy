@@ -5,7 +5,7 @@ use Grav\Common\Grav;
 use Grav\Common\Plugin;
 use Grav\Common\Utils;
 use http\Exception\RuntimeException;
-use SebastianBergmann\Git\Git;
+use CzProject\GitPhp\Git;
 
 class PushyRepo extends Git {
 
@@ -23,8 +23,10 @@ class PushyRepo extends Git {
 		$this->config = $this->grav['config']->get('plugins.pushy');
 		$this->repositoryPath = USER_DIR;
 
-		parent::__construct($this->repositoryPath);
+		$this->git = new Git;
+		$this->repo = $this->git->open($this->repositoryPath);
 
+		parent::__construct();
 	}
 
 	/**
@@ -39,10 +41,15 @@ class PushyRepo extends Git {
 	 */
 	public function hasChangesToCommit() {
 		$folders = $this->config['folders'];
-		$message = 'nothing to commit';
-		$output = $this->execute('status ' . implode(' ', $this->config['folders'])); // TODO: make space-separated folder list a static function
 
-		return strpos($output[count($output) - 1], $message) !== 0;
+		// adapted from \CzProject\GitPhp\GitRepository::hasChanges() but that does not provide a pathspec argument
+		// return $this->repo->hasChanges();
+
+		// Make sure the `git status` gets a refreshed look at the working tree.
+		$this->repo->execute('update-index', '-q', '--refresh');
+		$result = $this->repo->execute('status', implode(' ', $this->config['folders']), '--porcelain');
+		return !empty($result);
+
 	}
 
 	/**

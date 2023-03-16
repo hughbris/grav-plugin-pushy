@@ -140,18 +140,25 @@ class RequestHandler
         /** @var Page */
         $page = $pages->get($pageFolderPath);
 
-        $pageTitle = $page->title();
-        $pageAdminUrl = $pages->baseUrl() . "$adminRoute/pages{$page->rawRoute()}";
-        $pageSiteUrl = $page->url();
-        $type = GitItemType::Page;
+        if (is_null($page)) {
+            return new ChangedItem($gitItem, GitItemType::Other, '');
+        }
+        else {
 
-        if ($page->isModule()) {
-            $pageTitle .= ' (module)';
-            $pageSiteUrl = '';
-            $type = GitItemType::Module;
+            $pageTitle = $page->title();
+            $pageAdminUrl = $pages->baseUrl() . "$adminRoute/pages{$page->rawRoute()}";
+            $pageSiteUrl = $page->url();
+            $type = GitItemType::Page;
+
+            if ($page->isModule()) {
+                $pageTitle .= ' (module)';
+                $pageSiteUrl = '';
+                $type = GitItemType::Module;
+            }
+
+            return new ChangedItem($gitItem, $type, $pageTitle, $pageAdminUrl, $pageSiteUrl);
         }
 
-        return new ChangedItem($gitItem, $type, $pageTitle, $pageAdminUrl, $pageSiteUrl);
     }
 
     /**

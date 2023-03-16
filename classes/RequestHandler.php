@@ -162,7 +162,7 @@ class RequestHandler
     }
 
     /**
-     * Create ChangedItem for anything other then Page
+     * Create ChangedItem for anything other than Page
      * 
      * @param array{working: string, index: string, path: string} $gitItem
      */
@@ -195,7 +195,7 @@ class RequestHandler
 
         // TODO: Should be a dynamic check + handle other media types
         if (in_array($fileType, ['jpg', 'jpe', 'jpeg', 'png', 'webp', 'avif'])) {
-            $siteUrl = "$siteBaseUrl/user/${gitItem['path']}";
+            $siteUrl = "$siteBaseUrl/user/{$gitItem['path']}";
         }
 
         return new ChangedItem($gitItem, GitItemType::Other, '', '', $siteUrl);

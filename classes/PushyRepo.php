@@ -6,6 +6,7 @@ use Grav\Common\Plugin;
 use Grav\Common\Utils;
 use http\Exception\RuntimeException;
 use CzProject\GitPhp\GitRepository;
+use Grav\Common\User\DataUser\User;
 
 class PushyRepo extends GitRepository {
 
@@ -79,10 +80,14 @@ class PushyRepo extends GitRepository {
 				'working' => substr($change, 1, 1),
 				'index' => substr($change, 0, 1),
 				];
+
 			$paths = explode(' -> ', substr($change, 3));
-			$members['path'] = array_shift($paths);
-			if (!empty($paths)) {
-				$members['orig_path'] = array_shift($paths);
+			
+			if(count($paths) === 1) {
+				$members['path'] = $paths[0];
+			} else {
+				$members['orig_path'] = $paths[0];
+				$members['path'] = $paths[1];
 			}
 
 			array_push($ret, $members);
@@ -127,7 +132,7 @@ class PushyRepo extends GitRepository {
 	 * @param string $message
 	 * @return string[]
 	 */
-	public function commit($message, $options = NULL) {
+	public function commit($message, $options = []) {
 
 		if(!isset($this->grav['session'])) {
 			return; // FIXME
@@ -135,13 +140,18 @@ class PushyRepo extends GitRepository {
 
 		// TODO: process placeholders/Twig in $message
 
-		$user = $this->grav['session']->user->fullname; // TODO: add fallback as this is not required I think
-		$email = $this->grav['session']->user->email;
+		/** @var User */
+		$user = $this->grav['session']->user;
 
-		$author = $user . ' <' . $email . '>';
-		$authorFlag = '--author="' . $author . '"';
+		if ($user !== null && $user->authenticated) {
+			$name = $this->grav['session']->user->fullname; // TODO: add fallback as this is not required I think
+			$email = $this->grav['session']->user->email;
+	
+			$author = "$name <$email>";
+			$options[] = "--author=\"$author\"";
+		}
 
-		parent::commit($message, array_merge([$authorFlag], is_null($options) ? [] : $options));
+		parent::commit($message, $options);
 	}
 
 	/**

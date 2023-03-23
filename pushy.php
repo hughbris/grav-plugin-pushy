@@ -71,7 +71,7 @@ class PushyPlugin extends Plugin
 				$requestHandler = new RequestHandler();
 				$response = $requestHandler->handleRequest();
 
-				if ($response) {
+				if ($response !== null) {
 					echo json_encode($response);
 					die();
 				}

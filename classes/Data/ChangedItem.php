@@ -2,6 +2,7 @@
 
 namespace Grav\Plugin\Pushy\Data;
 
+use Grav\Plugin\Pushy\GitItemStatusType;
 use Grav\Plugin\Pushy\GitItemType;
 
 class ChangedItem
@@ -9,6 +10,7 @@ class ChangedItem
     public string $working = '';
     public string $index = '';
     public string $path = '';
+    public string $orig_path = '';
     public string $type = GitItemType::Page;
     public string $title = '';
     public string $adminUrl = '';
@@ -23,8 +25,13 @@ class ChangedItem
      * @param string $adminUrl If item is a page, the url in Admin
      * @param string $siteUrl If item is a page, the url on local site
      */
-    public function __construct(array $gitItem, string $type = GitItemType::Page, string $title = '', string $adminUrl = '', string $siteUrl = '')
-    {
+    public function __construct(
+        array $gitItem,
+        string $type = GitItemType::Page,
+        string $title = '',
+        string $adminUrl = '',
+        string $siteUrl = ''
+    ) {
         foreach ($gitItem as $key => $value) {
             $this->{$key} = $value;
         }

@@ -8,7 +8,6 @@ use Grav\Common\Page\Page;
 use Grav\Common\Page\Pages;
 use Grav\Common\Uri;
 use Grav\Plugin\Pushy\Data\ChangedItem;
-use Grav\Plugin\Pushy\Data\ChangedItems;
 use Grav\Plugin\Pushy\Data\GitActionResponse;
 
 abstract class GitItemType
@@ -32,15 +31,15 @@ class RequestHandler
     public function __construct()
     {
         $this->grav = Grav::instance();
-        $this->uri = $this->grav['uri']; /** @phpstan-ignore-line */
+        $this->uri = $this->grav['uri'];
         $this->repo = new PushyRepo();
     }
 
     /**
      * Handle async requests send by javascript injected by Pushy into Admin panel.
      *
-     * @return GitActionResponse|ChangedItems|null
      * The response specific to each type of request, or null if request is not from Pushy.
+     * @return GitActionResponse|ChangedItem[]|null
      */
     public function handleRequest()
     {
@@ -74,8 +73,10 @@ class RequestHandler
 
     /**
      * Read status of Git and return changed pages.
+     * 
+     * @return ChangedItem[]
      */
-    private function handleReadTask(): ChangedItems
+    private function handleReadTask()
     {
         /** @var Pages */
         $pages = $this->grav['pages'];
@@ -83,18 +84,23 @@ class RequestHandler
 
         $adminRoute = $this->grav['config']->get('plugins.admin.route');
 
-        $changedItems = new ChangedItems();
+        /** var ChangedItem[] */
+        $changedItems = [];
 
-        $gitItems = $this->repo->statusSelect();
+        // Todo: Use prober library API
+        $this->repo->execute(['add', '--all']);
+        $statusItems = $this->repo->statusParsed();
+        // Todo: Use prober library API
+        $this->repo->execute(['reset', '.']);
 
-        if ($gitItems) {
-            foreach ($gitItems as $item) {
+        if ($statusItems) {
+            foreach ($statusItems as $item) {
                 if ($this->isPage($item)) {
-                    $changedItems[$item['path']] = $this->addChangedPage($item, $pages, $adminRoute);
+                    $changedItems[] = $this->addChangedPage($item, $pages, $adminRoute);
                 } elseif ($this->isConfig($item)) {
-                    $changedItems[$item['path']] = $this->addChangedConfig($item);
+                    $changedItems[] = $this->addChangedConfig($item);
                 } else {
-                    $changedItems[$item['path']] = $this->addChangedOther($item, $pages->baseUrl());
+                    $changedItems[] = $this->addChangedOther($item, $pages->baseUrl());
                 }
             }
         }
@@ -137,25 +143,29 @@ class RequestHandler
         // Remove filename from path
         $pageFolderPath = implode('/', array_slice(explode('/', $pageFilePath), 0, -1));
 
-        /** @var Page */
-        $page = $pages->get($pageFolderPath);
+        if ($gitItem['index'] === 'D') {
+            return new ChangedItem($gitItem, GitItemType::Page);
+        } else {
+            /** @var Page */
+            $page = $pages->get($pageFolderPath);
 
-        $pageTitle = $page->title();
-        $pageAdminUrl = $pages->baseUrl() . "$adminRoute/pages{$page->rawRoute()}";
-        $pageSiteUrl = $page->url();
-        $type = GitItemType::Page;
+            $pageTitle = $page->title();
+            $pageAdminUrl = $pages->baseUrl() . "$adminRoute/pages{$page->rawRoute()}";
+            $pageSiteUrl = $page->url();
+            $type = GitItemType::Page;
 
-        if ($page->isModule()) {
-            $pageTitle .= ' (module)';
-            $pageSiteUrl = '';
-            $type = GitItemType::Module;
+            if ($page->isModule()) {
+                $pageTitle .= ' (module)';
+                $pageSiteUrl = '';
+                $type = GitItemType::Module;
+            }
+
+            return new ChangedItem($gitItem, $type, $pageTitle, $pageAdminUrl, $pageSiteUrl);
         }
-
-        return new ChangedItem($gitItem, $type, $pageTitle, $pageAdminUrl, $pageSiteUrl);
     }
 
     /**
-     * Create ChangedItem for anything other then Page
+     * Create ChangedItem for anything other than Page
      * 
      * @param array{working: string, index: string, path: string} $gitItem
      */
@@ -188,7 +198,7 @@ class RequestHandler
 
         // TODO: Should be a dynamic check + handle other media types
         if (in_array($fileType, ['jpg', 'jpe', 'jpeg', 'png', 'webp', 'avif'])) {
-            $siteUrl = "$siteBaseUrl/user/${gitItem['path']}";
+            $siteUrl = "$siteBaseUrl/user/{$gitItem['path']}";
         }
 
         return new ChangedItem($gitItem, GitItemType::Other, '', '', $siteUrl);
@@ -208,17 +218,29 @@ class RequestHandler
             );
         }
 
-        /** @var array{paths: string[], message: string} */
+        /** @var array{items: array<array{index: string, path: string, orig_path: string}>, message: string} */
         $pages = json_decode($taskData, true);
 
         try {
-            $paths = implode(' ', $pages['paths']);
-            $this->repo->stageFiles($paths);
+            foreach ($pages['items'] as $item) {
+                if ($item['index'] === 'D') {
+                    $this->repo->removeFile($item['path']);
+                } else if ($item['index'] === 'R') {
+                    $this->repo->removeFile($item['orig_path']);
+                    $this->repo->addFile($item['path']);
+                } else {
+                    $this->repo->addFile($item['path']);
+                }
+            }
+
             $this->repo->commit($pages['message']);
         } catch (Exception $e) {
+            $logger = $this->grav['log'];
+            $logger->addCritical($e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
+
             return new GitActionResponse(
                 false,
-                "There was an error publishing: \"{$e->getMessage()}\"", // FIXME
+                "There was an error publishing the changes. See Tools/Logs for more information.", // FIXME
             );
         }
 

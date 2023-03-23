@@ -14,6 +14,7 @@ var BannerStyle;
 })(BannerStyle || (BannerStyle = {}));
 class PushyAdmin {
     constructor() {
+        this.changedItems = [];
         this.initEventHandlers();
     }
     initEventHandlers() {
@@ -40,7 +41,7 @@ class PushyAdmin {
     }
     getSelectedItems() {
         const publishingData = {
-            paths: [],
+            items: [],
             message: '',
         };
         const summary = document.getElementById('summary');
@@ -54,21 +55,20 @@ class PushyAdmin {
         summaryAlert.classList.remove('invalid');
         publishingData.message = summary.value;
         const checkboxes = document.getElementsByClassName('selectbox');
-        for (const checkbox of checkboxes) {
-            if (checkbox.checked) {
-                publishingData.paths.push(checkbox.value);
+        for (let i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                publishingData.items.push(this.changedItems[i]);
             }
         }
         return publishingData;
     }
     async fetchItems() {
-        let answer;
         try {
             const response = await fetch(window.location.pathname + '/pushy:readItems', {
                 method: 'POST',
             });
             if (response.ok) {
-                answer = await response.json();
+                this.changedItems = await response.json();
             }
             else {
                 this.setBannerText('Read Items: No valid response from server.', BannerStyle.error);
@@ -79,10 +79,10 @@ class PushyAdmin {
             this.setBannerText('Read Items: Unexpected error while accessing the server.', BannerStyle.error);
             return;
         }
-        if (answer) {
-            this.setBannerText(`Found ${Object.keys(answer).length} changed items.`, BannerStyle.info);
-            this.updateMenuBadge(answer);
-            this.displayItems(answer);
+        if (this.changedItems) {
+            this.setBannerText(`Found ${Object.keys(this.changedItems).length} changed items.`, BannerStyle.info);
+            this.updateMenuBadge();
+            this.displayItems();
         }
     }
     clearInputs() {
@@ -92,37 +92,68 @@ class PushyAdmin {
             input.checked = false;
         }
     }
-    updateMenuBadge(changedItems) {
+    updateMenuBadge() {
         // Find badge for Publish menuitem
         const allMenuItems = document.querySelectorAll('#admin-menu li');
         const index = Array.from(allMenuItems).findIndex(node => { var _a; return ((_a = node.querySelector('em')) === null || _a === void 0 ? void 0 : _a.innerHTML) == 'Publish'; });
         const badge = allMenuItems[index].querySelector('#admin-menu li a .badge.count');
         // If badge is found, update badge
         if (badge) {
-            const changedItemCount = Object.keys(changedItems).length;
+            const changedItemCount = Object.keys(this.changedItems).length;
             badge.innerHTML = changedItemCount > 0 ? changedItemCount.toString() : '';
         }
     }
-    displayItems(items) {
+    displayItems() {
         this.clearInputs();
         const newBody = document.createElement('body');
-        Object.keys(items).forEach((path, i) => {
-            const item = items[path];
+        for (let i = 0; i < this.changedItems.length; i++) {
+            const item = this.changedItems[i];
             let innerHTML = '';
+            let status = '';
+            let pathTitle = '';
+            switch (item.index) {
+                case 'A':
+                    status = 'Added';
+                    pathTitle = item.title;
+                    break;
+                case 'M':
+                    status = 'Modified';
+                    pathTitle = item.title;
+                    break;
+                case 'D':
+                    status = 'Deleted';
+                    pathTitle = item.path;
+                    break;
+                case 'R':
+                    status = 'Renamed';
+                    pathTitle = `${item.orig_path} <i class="fa fa-long-arrow-right"></i> ${item.path}`;
+                    break;
+                default:
+                    throw new Error(`Invalid status "${item.index}"`);
+            }
             innerHTML = `
                 <td class="select">
-                    <input id="selectbox${i}" class="selectbox" type="checkbox" value="${item.path}">
+                    <input class="selectbox" type="checkbox">
                 </td>
-                <td class="path"><label for="selectbox${i}">
+                <td class="status">
+                    ${status}
+                </td>
                 `;
             if (item.type == GitItemType.Page) {
-                innerHTML +=
-                    `
-                    <a href="${item.siteUrl}" target="_blank">
-                        ${item.title}
-                        <i class="fa fa-external-link"></i>
-                    </a>
-                    `;
+                if (item.index == 'D') {
+                    innerHTML += `<td class="path">${pathTitle}</td>`;
+                }
+                else {
+                    innerHTML +=
+                        `
+                        <td class="path">
+                            <a href="${item.siteUrl}" target="_blank">
+                                ${pathTitle}
+                                <i class="fa fa-external-link"></i>
+                            </a>
+                        </td>
+                        `;
+                }
             }
             else if (item.type == GitItemType.Module) {
                 innerHTML += item.title;
@@ -146,16 +177,16 @@ class PushyAdmin {
             if (item.adminUrl) {
                 innerHTML +=
                     `
-                </td>
-                <td>
-                    <a href="${item.adminUrl}"><i class="fa fa-fw fa-pencil"></i></a>
-                </td>
-                `;
+                    <td class="edit">
+                        <a href="${item.adminUrl}"><i class="fa fa-fw fa-pencil"></i></a>
+                    </td>
+                    `;
             }
             const itemRow = document.createElement('tr');
             itemRow.innerHTML = innerHTML;
             newBody.appendChild(itemRow);
-        });
+        }
+        ;
         const tableRows = document.getElementById('itemlist');
         tableRows.innerHTML = newBody.innerHTML;
         const checkboxes = document.getElementsByClassName('selectbox');

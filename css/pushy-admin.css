@@ -15,9 +15,18 @@
   margin-bottom: 1px;
 }
 
+.pushy th.status,
+.pushy td.status {
+  flex: 1;
+  max-width: 5rem;
+}
 .pushy th.path,
 .pushy td.path {
   flex: 1;
+}
+.pushy th.edit,
+.pushy td.edit {
+  max-width: 2rem;
 }
 .pushy th.select-all,
 .pushy td.select {

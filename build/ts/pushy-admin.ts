@@ -9,14 +9,11 @@ interface ChangedItem {
     working: string;
     index: string;
     path: string;
+    orig_path: string;
     type: GitItemType;
     title: string;
     adminUrl: string;
     siteUrl: string;
-}
-
-interface ChangedItems {
-    [url: string]: ChangedItem;
 }
 
 interface Response {
@@ -25,7 +22,7 @@ interface Response {
 }
 
 interface PublishingData {
-    paths: string[];
+    items: ChangedItem[];
     message: string;
 }
 
@@ -36,6 +33,7 @@ enum BannerStyle {
 }
 
 class PushyAdmin {
+    changedItems: ChangedItem[] = [];
 
     constructor() {
         this.initEventHandlers();
@@ -75,7 +73,7 @@ class PushyAdmin {
 
     private getSelectedItems(): PublishingData | undefined {
         const publishingData: PublishingData = {
-            paths: [],
+            items: [],
             message: '',
         };
 
@@ -95,9 +93,10 @@ class PushyAdmin {
         publishingData.message = summary.value;
 
         const checkboxes = document.getElementsByClassName('selectbox') as HTMLCollectionOf<HTMLInputElement>;
-        for (const checkbox of checkboxes) {
-            if (checkbox.checked) {
-                publishingData.paths.push(checkbox.value);
+
+        for (let i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                publishingData.items.push(this.changedItems[i]);
             }
         }
 
@@ -105,8 +104,6 @@ class PushyAdmin {
     }
 
     public async fetchItems(): Promise<void> {
-        let answer: ChangedItems;
-
         try {
             const response = await fetch(
                 window.location.pathname + '/pushy:readItems',
@@ -116,7 +113,7 @@ class PushyAdmin {
             );
 
             if (response.ok) {
-                answer = await response.json() as ChangedItems;
+                this.changedItems = await response.json() as ChangedItem[];
             } else {
                 this.setBannerText('Read Items: No valid response from server.', BannerStyle.error);
 
@@ -128,10 +125,10 @@ class PushyAdmin {
             return;
         }
 
-        if (answer) {
-            this.setBannerText(`Found ${Object.keys(answer).length} changed items.`, BannerStyle.info);
-            this.updateMenuBadge(answer);
-            this.displayItems(answer);
+        if (this.changedItems) {
+            this.setBannerText(`Found ${Object.keys(this.changedItems).length} changed items.`, BannerStyle.info);
+            this.updateMenuBadge();
+            this.displayItems();
         }
     }
 
@@ -144,7 +141,7 @@ class PushyAdmin {
         }
     }
 
-    private updateMenuBadge(changedItems: ChangedItems) {
+    private updateMenuBadge() {
         // Find badge for Publish menuitem
         const allMenuItems = document.querySelectorAll('#admin-menu li');
         const index = Array.from(allMenuItems).findIndex(node => node.querySelector('em')?.innerHTML == 'Publish');
@@ -152,36 +149,67 @@ class PushyAdmin {
 
         // If badge is found, update badge
         if (badge) {
-            const changedItemCount = Object.keys(changedItems).length;
+            const changedItemCount = Object.keys(this.changedItems).length;
             badge.innerHTML = changedItemCount > 0 ? changedItemCount.toString() : '';
         }
     }
 
-    private displayItems(items: ChangedItems) {
+    private displayItems() {
         this.clearInputs();
 
         const newBody = document.createElement('body')
 
-        Object.keys(items).forEach((path: string, i: number) => {
-            const item: ChangedItem = items[path];
+        for(let i = 0; i < this.changedItems.length; i++) {
+            const item: ChangedItem = this.changedItems[i];
 
             let innerHTML = '';
+            let status = '';
+            let pathTitle = '';
+
+            switch(item.index) {
+                case 'A':
+                    status = 'Added';
+                    pathTitle = item.title;
+                    break;
+                case 'M':
+                    status = 'Modified';
+                    pathTitle = item.title;
+                    break;
+                case 'D':
+                    status = 'Deleted';
+                    pathTitle = item.path;
+                    break;
+                case 'R':
+                    status = 'Renamed';
+                    pathTitle = `${item.orig_path} <i class="fa fa-long-arrow-right"></i> ${item.path}`;
+                    break;
+                default:
+                    throw new Error(`Invalid status "${item.index}"`);
+            }
 
             innerHTML = `
                 <td class="select">
-                    <input id="selectbox${i}" class="selectbox" type="checkbox" value="${item.path}">
+                    <input class="selectbox" type="checkbox">
                 </td>
-                <td class="path"><label for="selectbox${i}">
+                <td class="status">
+                    ${status}
+                </td>
                 `;
 
             if (item.type == GitItemType.Page) {
-                innerHTML +=
-                    `
-                    <a href="${item.siteUrl}" target="_blank">
-                        ${item.title}
-                        <i class="fa fa-external-link"></i>
-                    </a>
-                    `;
+                if (item.index == 'D') {
+                    innerHTML += `<td class="path">${pathTitle}</td>`;
+                } else {
+                    innerHTML +=
+                        `
+                        <td class="path">
+                            <a href="${item.siteUrl}" target="_blank">
+                                ${pathTitle}
+                                <i class="fa fa-external-link"></i>
+                            </a>
+                        </td>
+                        `;
+                }
             } else if (item.type == GitItemType.Module) {
                 innerHTML += item.title;
             } else if (item.type == GitItemType.Config) {
@@ -202,18 +230,17 @@ class PushyAdmin {
             if (item.adminUrl) {
                 innerHTML +=
                     `
-                </td>
-                <td>
-                    <a href="${item.adminUrl}"><i class="fa fa-fw fa-pencil"></i></a>
-                </td>
-                `;
+                    <td class="edit">
+                        <a href="${item.adminUrl}"><i class="fa fa-fw fa-pencil"></i></a>
+                    </td>
+                    `;
             }
 
             const itemRow = document.createElement('tr');
             itemRow.innerHTML = innerHTML;
 
             newBody.appendChild(itemRow);
-        });
+        };
 
         const tableRows = document.getElementById('itemlist') as HTMLElement;
         tableRows.innerHTML = newBody.innerHTML;

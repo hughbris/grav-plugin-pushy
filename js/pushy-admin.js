@@ -106,7 +106,7 @@ class PushyAdmin {
     }
     displayItems() {
         this.clearInputs();
-        const newBody = document.createElement('body');
+        const list = document.querySelector('.list');
         for (let i = 0; i < this.changedItems.length; i++) {
             const item = this.changedItems[i];
             let innerHTML = '';
@@ -123,36 +123,32 @@ class PushyAdmin {
                     break;
                 case 'D':
                     status = pushy.translations.statusDeleted;
-                    pathTitle = item.path;
+                    pathTitle = encodeURI(item.path);
                     break;
                 case 'R':
                     status = pushy.translations.statusRenamed;
-                    pathTitle = `${item.orig_path} <i class="fa fa-long-arrow-right"></i> ${item.path}`;
+                    pathTitle = `${encodeURI(item.orig_path)} <i class="fa fa-long-arrow-right"></i> ${encodeURI(item.path)}`;
                     break;
                 default:
                     throw new Error(`Invalid status "${item.index}"`);
             }
             innerHTML = `
-                <td class="select">
-                    <input class="selectbox" type="checkbox">
-                </td>
-                <td class="status">
-                    ${status}
-                </td>
+                <div class="select"><input class="selectbox" type="checkbox"></div>           
+                <div class="status">${status}</div>
                 `;
             if (item.type == GitItemType.Page) {
                 if (item.index == 'D') {
-                    innerHTML += `<td class="path">${pathTitle}</td>`;
+                    innerHTML += `<div class="path">${pathTitle}</div>`;
                 }
                 else {
                     innerHTML +=
                         `
-                        <td class="path">
+                        <div class="path">
                             <a href="${item.siteUrl}" target="_blank">
                                 ${pathTitle}
                                 <i class="fa fa-external-link"></i>
                             </a>
-                        </td>
+                        </div>
                         `;
                 }
             }
@@ -178,24 +174,28 @@ class PushyAdmin {
             if (item.adminUrl) {
                 innerHTML +=
                     `
-                    <td class="edit">
+                    <div class="edit">
                         <a href="${item.adminUrl}"><i class="fa fa-fw fa-pencil"></i></a>
-                    </td>
+                    </div>
                     `;
             }
-            const itemRow = document.createElement('tr');
-            itemRow.innerHTML = innerHTML;
-            newBody.appendChild(itemRow);
+            else {
+                innerHTML += `<div class="edit"></div>`;
+            }
+            this.addItemToList(list, innerHTML);
         }
         ;
-        const tableRows = document.getElementById('itemlist');
-        tableRows.innerHTML = newBody.innerHTML;
         const checkboxes = document.getElementsByClassName('selectbox');
         for (const box of checkboxes) {
             box.addEventListener('click', () => {
                 this.enablePublishButton();
             });
         }
+    }
+    addItemToList(list, innerHTML) {
+        const itemRow = document.createElement('template');
+        itemRow.innerHTML = innerHTML;
+        list.append(...itemRow.content.children);
     }
     async publishItems(items) {
         this.clearBannerText();

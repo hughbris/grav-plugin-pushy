@@ -15,24 +15,19 @@
   margin-bottom: 1px;
 }
 
-.pushy th.status,
-.pushy td.status {
-  flex: 1;
-  max-width: 5rem;
-}
-.pushy th.path,
-.pushy td.path {
-  flex: 1;
-}
-.pushy th.edit,
-.pushy td.edit {
-  max-width: 2rem;
-}
-.pushy th.select-all,
-.pushy td.select {
-  flex: 0;
+.pushy .edit {
   text-align: center;
-  margin-right: 1rem;
+}
+.pushy .list {
+  display: grid;
+  grid-template-columns: fit-content(0) fit-content(0) 1fr fit-content(0);
+  -moz-column-gap: 1em;
+  column-gap: 1em;
+  row-gap: 0.5rem;
+  margin: 0 1.5rem;
+}
+.pushy .list .header {
+  font-weight: bold;
 }
 .pushy .message-summary,
 .pushy .message-description {

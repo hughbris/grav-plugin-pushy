@@ -21,27 +21,19 @@
 
 .pushy {
 
-    th.status,
-    td.status {
-        flex: 1;
-        max-width: 5rem;
-    }
-
-    th.path,
-    td.path {
-        flex: 1;
-    }
-
-    th.edit,
-    td.edit {
-        max-width: 2rem;
-    }
-
-    th.select-all,
-    td.select {
-        flex: 0;
+    .edit {
         text-align: center;
-        margin-right: 1rem;
+    }
+
+    .list {
+        display: grid;
+        grid-template-columns: fit-content(0) fit-content(0) 1fr fit-content(0);
+        column-gap: 1em;
+        row-gap: 0.5rem;
+        margin: 0 1.5rem;
+    }
+    .list .header {
+        font-weight: bold;
     }
 
     .message-summary,

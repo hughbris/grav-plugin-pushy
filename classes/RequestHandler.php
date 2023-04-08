@@ -212,6 +212,10 @@ class RequestHandler
         $taskData = file_get_contents('php://input');
 
         if ($taskData === false) {
+            $log = $this->grav['log'];
+            $jsonTaskData = json_encode($taskData);
+            $log->addCritical("Pushy - No valid data submitted: $jsonTaskData");
+
             return new GitActionResponse(
                 false,
                 $this->translate('PUBLISH_INVALID_DATA_SUBMITTED'),
@@ -235,8 +239,8 @@ class RequestHandler
 
             $this->repo->commit($pages['message']);
         } catch (Exception $e) {
-            $logger = $this->grav['log'];
-            $logger->addCritical($e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
+            $log = $this->grav['log'];
+            $log->addCritical($e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
 
             return new GitActionResponse(
                 false,

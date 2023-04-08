@@ -18,7 +18,6 @@
         "js-once": "tsc --project .",
         "js-minify": "uglifyjs-folder ../js --pattern \"**/*.js,!**/*.min.js\" --output ../js --each --harmony --config-file uglifyjs.config.json"
     },
-    "dependencies": {},
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^4.23.0",
         "@typescript-eslint/parser": "^4.23.0",
@@ -31,6 +30,6 @@
         "sass": "1.32.13",
         "tslib": "^2.2.0",
         "typescript": "4.2.4",
-        "uglifyjs-folder": "^2.0.0"
+        "uglifyjs-folder": "^3.2.0"
     }
 }

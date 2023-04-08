@@ -119,7 +119,7 @@ class PushyPlugin extends Plugin
 	{
 		$isInitialized = GitUtils::isGitInitialized();
 		// TODO: test for GitUtils::isGitInstalled()
-		$menuLabel = $isInitialized ? 'Publish' : 'Publishing';
+		$menuLabel = $isInitialized ? $this->translate('MENU_LABEL_PUBLISH') : $this->translate('MENU_LABEL_CONFIG');
 
 		$count = new Container(['count' => function () { 
 			$itemCount = count($this->repo->statusSelect());
@@ -128,7 +128,7 @@ class PushyPlugin extends Plugin
 		}]);
 
 		$options = [
-			'hint' => $isInitialized ? 'Publish' : 'Publication settings',
+			'hint' => $isInitialized ? $this->translate('MENU_HINT_PUBLISH') : $this->translate('MENU_HINT_CONFIG'),
 			'route' => $isInitialized ? $this->admin_route : "plugins/{$this->name}",
 			'icon' => 'fa-' . ($isInitialized ? $this->grav['plugins']->get($this->name)->blueprints()->get('icon') : 'cog'),
 			'badge' => $count,
@@ -418,6 +418,7 @@ class PushyPlugin extends Plugin
 		$assets = $this->grav['assets'];
 
 		$assets->addJs("plugin://pushy/js/pushy-admin.js", ['type' => 'module']);
+		$assets->addInlineJs($this->getTranslations());
 		$assets->addCss("plugin://pushy/css/pushy-admin.css");
 	}
 
@@ -435,4 +436,39 @@ class PushyPlugin extends Plugin
 
 		return $currentPath === $publishPath;
 	}
+
+	/**
+	 * Get translations for front-end
+	 */
+	protected function getTranslations(): string{
+		$isInitialized = GitUtils::isGitInitialized();
+		// TODO: test for GitUtils::isGitInstalled()
+		$menuLabel = $isInitialized ? $this->translate('MENU_LABEL_PUBLISH') : $this->translate('MENU_LABEL_CONFIG');
+
+		$translations = "const pushy = {
+			translations: {
+				menuLabel: '$menuLabel',
+				fetchInvalidResponse: '{$this->translate("FETCH_INVALID_RESPONSE")}',
+				fetchException: '{$this->translate("FETCH_EXCEPTION")}',
+				fetchItemsFound: '{$this->translate("FETCH_ITEMS_FOUND")}',
+				publishIinvalidResponse: '{$this->translate("PUBLISH_INVALID_RESPONSE")}',
+				publishException: '{$this->translate("PUBLISH_EXCEPTION")}',
+				statusNew: '{$this->translate("STATUS_NEW")}',
+				statusModified: '{$this->translate("STATUS_MODIFIED")}',
+				statusDeleted: '{$this->translate("STATUS_DELETED")}',
+				statusRenamed: '{$this->translate("STATUS_RENAMED")}',
+			}
+		};";
+
+		return $translations;
+	}
+
+    private function translate(string $key, ?string $arg = null) : string {
+        $prefix = 'PLUGIN_PUSHY';
+
+        $user = $this->grav['user'];
+        $language = $user['language'];
+
+		return $this->grav['language']->translate(["$prefix.$key", $arg], [$language]);
+    }
 }

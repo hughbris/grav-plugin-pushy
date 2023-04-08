@@ -214,7 +214,7 @@ class RequestHandler
         if ($taskData === false) {
             return new GitActionResponse(
                 false,
-                "No valid data submitted for task 'Publish'",
+                $this->translate('PUBLISH_INVALID_DATA_SUBMITTED'),
             );
         }
 
@@ -240,13 +240,22 @@ class RequestHandler
 
             return new GitActionResponse(
                 false,
-                "There was an error publishing the changes. See Tools/Logs for more information.", // FIXME
+                $this->translate('PUBLISH_EXCEPTION'), // FIXME
             );
         }
 
         return new GitActionResponse(
             true,
-            'Items have been published.',
+            $this->translate('PUBLISH_SUCCESS'),
         );
+    }
+
+    private function translate(string $key, ?string $arg = null) : string {
+        $prefix = 'PLUGIN_PUSHY';
+
+        $user = $this->grav['user'];
+        $language = $user['language'];
+
+		return $this->grav['language']->translate(["$prefix.$key", $arg], [$language]);
     }
 }

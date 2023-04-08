@@ -291,11 +291,10 @@ class PushyAdmin {
 
             if (answer.isSuccess) {
                 this.setBannerText(answer.alert, BannerStyle.info);
+                void this.fetchItems();
             } else {
                 this.setBannerText(answer.alert, BannerStyle.error);
             }
-
-            void this.fetchItems();
         } else {
             this.setBannerText(pushy.translations.publishInvalidResponse, BannerStyle.error);
         }

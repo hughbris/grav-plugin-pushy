@@ -8,40 +8,40 @@
 	{% if isAuthorised %}
 		<div class="button-bar">
 			<a class="button" id="publish">
-				<i class="fa fa-fw fa-upload"></i>Publish</a>
+				<i class="fa fa-fw fa-upload"></i>{{ "PLUGIN_PUSHY.PUBLISH_BUTTON"|t }}</a>
 		</div>
 	{% endif %}
 
 	<h1>
 		<i class="fa fa-fw fa-upload"></i>
-		Publishing
+		{{ "PLUGIN_PUSHY.PAGE_HEADER"|t }}
 	</h1>
 {% endblock %}
 
 {% block content %}
 	{% if isAuthorised %}
 		<div class="pushy">
-			<h1>List of changed items</h1>
+			<h1>{{ "PLUGIN_PUSHY.HEADER_ITEM_LIST"|t }}</h1>
 
 		<table>
 			<thead>
 				<th class="select-all"><input id="select-all" type="checkbox"></th>
-				<th class="status">Status</th>
-				<th class="path">Title / Path</th>
-				<th class="edit">Edit</th>
+				<th class="status">{{ "PLUGIN_PUSHY.LIST_HEADER_STATUS"|t }}</th>
+				<th class="path">{{ "PLUGIN_PUSHY.LIST_HEADER_PATH"|t }}</th>
+				<th class="edit">{{ "PLUGIN_PUSHY.LIST_HEADER_EDIT"|t }}</th>
 			</thead>
 			<tbody id="itemlist"></tbody>
 		</table>
 		<div class="message-summary">
-			<label for="summary">Summary for publishing history <span class="required">*</span>:</label>
+			<label for="summary">{{ "PLUGIN_PUSHY.SUMMARY_TITLE"|t }}<span class="required"> *</span>:</label>
 			<input id="summary" type="text">
-			<div id="summary-alert" class="">Summary should be provided</div>
+			<div id="summary-alert" class="">{{ "PLUGIN_PUSHY.ALERT_SUMMARY"|t }}</div>
 		</div>
 		</div>
 	{% else %}
 		<div id="messages" class="top-notifications-container default-box-shadow">
 			<div class="single-notification info alert hidden" data-gpm-grav=""></div>
-			<div class="error alert">You have insufficient permissions for Publishing.</div>
+			<div class="error alert">{{ "PLUGIN_PUSHY.ALERT_PERMISSION"|t }}</div>
 		</div>
 	{% endif %}
 {% endblock %}

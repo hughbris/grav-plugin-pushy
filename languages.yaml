@@ -1,4 +1,61 @@
 en:
   PLUGIN_PUSHY:
-    TEXT_VARIABLE: Text Variable
-    TEXT_VARIABLE_HELP: Text to add to the top of a page
+    MENU_LABEL_PUBLISH: Publish
+    MENU_LABEL_CONFIG: Publishing
+    MENU_LABEL_HINT_PUBLISH: Publish
+    MENU_LABEL_HINT CONFIG: Publish settings
+    
+    PAGE_HEADER: Publishing
+    PUBLISH_BUTTON: Publish
+    HEADER_ITEM_LIST: List of changed items
+    LIST_HEADER_STATUS: Status
+    LIST_HEADER_PATH: Title / Path
+    LIST_HEADER_EDIT: Edit
+    STATUS_NEW: New
+    STATUS_MODIFIED: Modified
+    STATUS_DELETED: Deleted
+    STATUS_RENAMED: Renamed
+    SUMMARY_TITLE: Summary for publishing history
+    ALERT_SUMMARY: Summary should be provided.
+    ALERT_PERMISSION: You have insufficient permissions for Publishing.
+
+    FETCH_INVALID_RESPONSE: No valid response from server while fetching changes. See Tools/Logs for more information.
+    FETCH_EXCEPTION: Unexpected server or network error while fetching changes. See Tools/Logs for more information.
+    FETCH_ITEMS_FOUND: Found {count} changed items.
+
+    PUBLISH_INVALID_RESPONSE: Invalid response from server while publishing items.
+    PUBLISH_UNEXPECTED_ERROR: Unexpected server or network error while publishing items.
+    PUBLISH_EXCEPTION: There was an error publishing the changes. See Tools/Logs for more information.
+    PUBLISH_SUCCESS: Items have been published.
+    PUBLISH_INVALID_DATA_SUBMITTED: Server did not receive valid data to publish. See Tools/Logs for more information.
+
+it:
+  PLUGIN_PUSHY:
+    MENU_LABEL_PUBLISH: Pubblicare
+    MENU_LABEL_CONFIG: Pubblica configurazione
+    MENU_HINT_PUBLISH: Pubblicare
+    MENU_HINT CONFIG: Editoria
+
+    PAGE_HEADER: Editoria
+    PUBLISH_BUTTON: Pubblicare
+    HEADER_ITEM_LIST: Elenco delle modifiche
+    LIST_HEADER_STATUS: Stato
+    LIST_HEADER_PATH: Titolo / Sentiero
+    LIST_HEADER_EDIT: Modifica
+    STATUS_NEW: Nuovo
+    STATUS_MODIFIED: Modificata
+    STATUS_DELETED: Eliminato
+    STATUS_RENAMED: Rinominato
+    SUMMARY_TITLE: Pubblica riepilogo per cronologia
+    ALERT_SUMMARY: Riepilogo non inserito.
+    ALERT_PERMISSION: Non disponi di privilegi sufficienti per la pubblicazione.
+
+    FETCH_INVALID_RESPONSE: Nessuna risposta valida dal server durante il recupero di changes. Vedere Strumenti/registri per ulteriori informazioni.
+    FETCH_EXCEPTION: Errore imprevisto del server o della rete durante il recupero di changes. Vedere Strumenti/registri per ulteriori informazioni.
+    FETCH_ITEMS_FOUND: Trovati {count} elementi modificati.
+
+    PUBLISH_INVALID_RESPONSE: Risposta non valida dal server durante la pubblicazione di items.
+    PUBLISH_UNEXPECTED_ERROR: Errore imprevisto del server o della rete durante la pubblicazione di items.
+    PUBLISH_EXCEPTION: Si è verificato un errore durante la pubblicazione delle modifiche. Vedere Strumenti/registri per ulteriori informazioni.
+    PUBLISH_SUCCESS: Gli articoli sono stati pubblicati.
+    PUBLISH_INVALID_DATA_SUBMITTED: Il server non ha ricevuto dati validi da pubblicare. Vedere Strumenti/registri per ulteriori informazioni.

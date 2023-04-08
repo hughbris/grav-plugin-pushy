@@ -32,6 +32,21 @@ enum BannerStyle {
     error,
 }
 
+declare const pushy: {
+    translations: {
+        menuLabel: string,
+        fetchInvalidResponse: string,
+        fetchException: string,
+        fetchItemsFound: string,
+        publishInvalidResponse: string,
+        publishException: string,
+        statusNew: string,
+        statusModified: string,
+        statusDeleted: string,
+        statusRenamed: string,
+    }
+};
+
 class PushyAdmin {
     changedItems: ChangedItem[] = [];
 
@@ -115,18 +130,18 @@ class PushyAdmin {
             if (response.ok) {
                 this.changedItems = await response.json() as ChangedItem[];
             } else {
-                this.setBannerText('Read Items: No valid response from server.', BannerStyle.error);
-
+                this.setBannerText(pushy.translations.fetchInvalidResponse, BannerStyle.error);
                 return;
             }
         } catch (error) {
-            this.setBannerText('Read Items: Unexpected error while accessing the server.', BannerStyle.error);
+            this.setBannerText(pushy.translations.fetchException, BannerStyle.error);
 
             return;
         }
 
         if (this.changedItems) {
-            this.setBannerText(`Found ${Object.keys(this.changedItems).length} changed items.`, BannerStyle.info);
+            const text = pushy.translations.fetchItemsFound.replace('{count}', this.changedItems.length.toString());
+            this.setBannerText(text, BannerStyle.info);
             this.updateMenuBadge();
             this.displayItems();
         }
@@ -144,7 +159,7 @@ class PushyAdmin {
     private updateMenuBadge() {
         // Find badge for Publish menuitem
         const allMenuItems = document.querySelectorAll('#admin-menu li');
-        const index = Array.from(allMenuItems).findIndex(node => node.querySelector('em')?.innerHTML == 'Publish');
+        const index = Array.from(allMenuItems).findIndex(node => node.querySelector('em')?.innerHTML == pushy.translations.menuLabel);
         const badge = allMenuItems[index].querySelector('#admin-menu li a .badge.count');
 
         // If badge is found, update badge
@@ -168,19 +183,19 @@ class PushyAdmin {
 
             switch(item.index) {
                 case 'A':
-                    status = 'Added';
+                    status = pushy.translations.statusNew;
                     pathTitle = item.title;
                     break;
                 case 'M':
-                    status = 'Modified';
+                    status = pushy.translations.statusModified;
                     pathTitle = item.title;
                     break;
                 case 'D':
-                    status = 'Deleted';
+                    status = pushy.translations.statusDeleted;
                     pathTitle = item.path;
                     break;
                 case 'R':
-                    status = 'Renamed';
+                    status = pushy.translations.statusRenamed;
                     pathTitle = `${item.orig_path} <i class="fa fa-long-arrow-right"></i> ${item.path}`;
                     break;
                 default:
@@ -267,7 +282,7 @@ class PushyAdmin {
                 }
             );
         } catch (error) {
-            this.setBannerText('Publish items: Unexpected error while accessing the server.', BannerStyle.error);
+            this.setBannerText(pushy.translations.publishException, BannerStyle.error);
             return;
         }
 
@@ -282,7 +297,7 @@ class PushyAdmin {
 
             void this.fetchItems();
         } else {
-            this.setBannerText('No valid response from server.', BannerStyle.error);
+            this.setBannerText(pushy.translations.publishInvalidResponse, BannerStyle.error);
         }
     }
 

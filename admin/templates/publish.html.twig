@@ -8,7 +8,8 @@
 	{% if isAuthorised %}
 		<div class="button-bar">
 			<a class="button" id="publish">
-				<i class="fa fa-fw fa-upload"></i>{{ "PLUGIN_PUSHY.PUBLISH_BUTTON"|t }}</a>
+				<i class="fa fa-fw fa-upload"></i>
+				{{ "PLUGIN_PUSHY.PUBLISH_BUTTON"|t }}</a>
 		</div>
 	{% endif %}
 
@@ -23,17 +24,14 @@
 		<div class="pushy">
 			<h1>{{ "PLUGIN_PUSHY.HEADER_ITEM_LIST"|t }}</h1>
 
-		<div class="list">
-			<div class="header select-all"><input id="select-all" type="checkbox"></div>
-			<div class="header status">{{ "PLUGIN_PUSHY.LIST_HEADER_STATUS"|t }}</div>
-			<div class="header path">{{ "PLUGIN_PUSHY.LIST_HEADER_PATH"|t }}</div>
-			<div class="header edit">{{ "PLUGIN_PUSHY.LIST_HEADER_EDIT"|t }}</div>
-		</div>
-		<div class="message-summary">
-			<label for="summary">{{ "PLUGIN_PUSHY.SUMMARY_TITLE"|t }}<span class="required"> *</span>:</label>
-			<input id="summary" type="text">
-			<div id="summary-alert" class="">{{ "PLUGIN_PUSHY.ALERT_SUMMARY"|t }}</div>
-		</div>
+			<div class="list"></div>
+
+			<div class="message-summary">
+				<label for="summary">{{ "PLUGIN_PUSHY.SUMMARY_TITLE"|t }}<span class="required">
+						*</span>:</label>
+				<input id="summary" type="text">
+				<div id="summary-alert" class="">{{ "PLUGIN_PUSHY.ALERT_SUMMARY"|t }}</div>
+			</div>
 		</div>
 	{% else %}
 		<div id="messages" class="top-notifications-container default-box-shadow">

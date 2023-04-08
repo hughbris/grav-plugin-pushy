@@ -26,14 +26,6 @@ class PushyAdmin {
                 this.publishItems(publishingItems);
             }
         });
-        const selectAllCheckbox = document.getElementById('select-all');
-        selectAllCheckbox.addEventListener('click', () => {
-            const allCheckboxes = document.getElementsByClassName('selectbox');
-            for (const checkbox of allCheckboxes) {
-                checkbox.checked = selectAllCheckbox.checked;
-            }
-            this.enablePublishButton();
-        });
         const summary = document.getElementById('summary');
         summary.addEventListener('input', () => {
             this.enablePublishButton();
@@ -107,6 +99,8 @@ class PushyAdmin {
     displayItems() {
         this.clearInputs();
         const list = document.querySelector('.list');
+        list.innerHTML = '';
+        this.addHeaderToList(list);
         for (let i = 0; i < this.changedItems.length; i++) {
             const item = this.changedItems[i];
             let innerHTML = '';
@@ -191,6 +185,28 @@ class PushyAdmin {
                 this.enablePublishButton();
             });
         }
+    }
+    addHeaderToList(list) {
+        const innerHTML = `
+        <div class="header select-all"><input id="select-all" type="checkbox"></div>
+        <div class="header status">${pushy.translations.listHeaderStatus}</div>
+        <div class="header path">${pushy.translations.listHeaderPath}</div>
+        <div class="header edit">${pushy.translations.listHeaderEdit}</div>
+        `;
+        const header = document.createElement('template');
+        header.innerHTML = innerHTML;
+        list.append(...header.content.children);
+        this.addEventHandlerToSelectAll();
+    }
+    addEventHandlerToSelectAll() {
+        const selectAllCheckbox = document.getElementById('select-all');
+        selectAllCheckbox.addEventListener('click', () => {
+            const allCheckboxes = document.getElementsByClassName('selectbox');
+            for (const checkbox of allCheckboxes) {
+                checkbox.checked = selectAllCheckbox.checked;
+            }
+            this.enablePublishButton();
+        });
     }
     addItemToList(list, innerHTML) {
         const itemRow = document.createElement('template');

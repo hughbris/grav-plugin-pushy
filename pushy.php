@@ -448,6 +448,9 @@ class PushyPlugin extends Plugin
 		$translations = "const pushy = {
 			translations: {
 				menuLabel: '$menuLabel',
+				listHeaderStatus: '{$this->translate("LIST_HEADER_STATUS")}',
+				listHeaderPath: '{$this->translate("LIST_HEADER_PATH")}',
+				listHeaderEdit: '{$this->translate("LIST_HEADER_EDIT")}',
 				fetchInvalidResponse: '{$this->translate("FETCH_INVALID_RESPONSE")}',
 				fetchException: '{$this->translate("FETCH_EXCEPTION")}',
 				fetchItemsFound: '{$this->translate("FETCH_ITEMS_FOUND")}',

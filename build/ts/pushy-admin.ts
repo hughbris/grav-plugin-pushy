@@ -35,6 +35,9 @@ enum BannerStyle {
 declare const pushy: {
     translations: {
         menuLabel: string,
+        listHeaderStatus: string,
+        listHeaderPath: string,
+        listHeaderEdit: string,
         fetchInvalidResponse: string,
         fetchException: string,
         fetchItemsFound: string,
@@ -65,18 +68,6 @@ class PushyAdmin {
             if (publishingItems) {
                 this.publishItems(publishingItems);
             }
-        });
-
-        const selectAllCheckbox = document.getElementById('select-all') as HTMLInputElement;
-
-        selectAllCheckbox.addEventListener('click', () => {
-            const allCheckboxes = document.getElementsByClassName('selectbox') as HTMLCollectionOf<HTMLInputElement>;
-
-            for (const checkbox of allCheckboxes) {
-                checkbox.checked = selectAllCheckbox.checked;
-            }
-
-            this.enablePublishButton();
         });
 
         const summary = document.getElementById('summary') as HTMLInputElement;
@@ -173,6 +164,8 @@ class PushyAdmin {
         this.clearInputs();
 
         const list: HTMLElement | null = document.querySelector('.list');
+        list!.innerHTML = '';
+        this.addHeaderToList(list!);
 
         for (let i = 0; i < this.changedItems.length; i++) {
             const item: ChangedItem = this.changedItems[i];
@@ -258,6 +251,37 @@ class PushyAdmin {
                 this.enablePublishButton()
             });
         }
+    }
+
+    public addHeaderToList(list: HTMLElement) {
+        const innerHTML = 
+        `
+        <div class="header select-all"><input id="select-all" type="checkbox"></div>
+        <div class="header status">${pushy.translations.listHeaderStatus}</div>
+        <div class="header path">${pushy.translations.listHeaderPath}</div>
+        <div class="header edit">${pushy.translations.listHeaderEdit}</div>
+        `;
+
+        const header = document.createElement('template');
+        header.innerHTML = innerHTML;
+
+        list.append(...header.content.children);
+
+        this.addEventHandlerToSelectAll();
+    }
+
+    public addEventHandlerToSelectAll() {
+        const selectAllCheckbox = document.getElementById('select-all') as HTMLInputElement;
+
+        selectAllCheckbox.addEventListener('click', () => {
+            const allCheckboxes = document.getElementsByClassName('selectbox') as HTMLCollectionOf<HTMLInputElement>;
+
+            for (const checkbox of allCheckboxes) {
+                checkbox.checked = selectAllCheckbox.checked;
+            }
+
+            this.enablePublishButton();
+        });
     }
 
     public addItemToList(list: HTMLElement, innerHTML: string) {

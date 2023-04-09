@@ -53,6 +53,18 @@ class PushyRepo extends GitRepository {
 	/**
 	 * @return array
 	 */
+	public function getChangedItems() {
+        // Todo: Use prober library API
+        $this->execute(['add', '--all']);
+        $statusItems = $this->statusParsed();
+        $this->execute(['reset', '.']);
+
+		return $statusItems;
+	}
+
+	/**
+	 * @return array
+	 */
 	private function statusLines($filter=TRUE) {
 		$command = explode(' ', 'status -u --find-renames --porcelain');
 		if ($filter) {

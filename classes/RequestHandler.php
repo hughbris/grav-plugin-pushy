@@ -87,11 +87,7 @@ class RequestHandler
         /** var ChangedItem[] */
         $changedItems = [];
 
-        // Todo: Use prober library API
-        $this->repo->execute(['add', '--all']);
-        $statusItems = $this->repo->statusParsed();
-        // Todo: Use prober library API
-        $this->repo->execute(['reset', '.']);
+        $statusItems = $this->repo->getChangedItems();
 
         if ($statusItems) {
             foreach ($statusItems as $item) {

@@ -122,7 +122,7 @@ class PushyPlugin extends Plugin
 		$menuLabel = $isInitialized ? $this->translate('MENU_LABEL_PUBLISH') : $this->translate('MENU_LABEL_CONFIG');
 
 		$count = new Container(['count' => function () { 
-			$itemCount = count($this->repo->statusSelect());
+			$itemCount = count($this->repo->getChangedItems() ?? []);
 
 			return $itemCount === 0 ? '' : $itemCount; 
 		}]);
@@ -454,6 +454,7 @@ class PushyPlugin extends Plugin
 				fetchInvalidResponse: '{$this->translate("FETCH_INVALID_RESPONSE")}',
 				fetchException: '{$this->translate("FETCH_EXCEPTION")}',
 				fetchItemsFound: '{$this->translate("FETCH_ITEMS_FOUND")}',
+				fetchNoItemsFound: '{$this->translate("FETCH_NO_ITEMS_FOUND")}',
 				publishIinvalidResponse: '{$this->translate("PUBLISH_INVALID_RESPONSE")}',
 				publishException: '{$this->translate("PUBLISH_EXCEPTION")}',
 				statusNew: '{$this->translate("STATUS_NEW")}',

@@ -22,6 +22,7 @@ en:
     FETCH_INVALID_RESPONSE: No valid response from server while fetching changes. See Tools/Logs for more information.
     FETCH_EXCEPTION: Unexpected server or network error while fetching changes. See Tools/Logs for more information.
     FETCH_ITEMS_FOUND: Found {count} changed items.
+    FETCH_NO_ITEMS_FOUND: There are no changes to display. Make some edits to see changes listed here.
 
     PUBLISH_INVALID_RESPONSE: Invalid response from server while publishing items.
     PUBLISH_UNEXPECTED_ERROR: Unexpected server or network error while publishing items.
@@ -53,6 +54,7 @@ it:
     FETCH_INVALID_RESPONSE: Nessuna risposta valida dal server durante il recupero di changes. Vedere Strumenti/registri per ulteriori informazioni.
     FETCH_EXCEPTION: Errore imprevisto del server o della rete durante il recupero di changes. Vedere Strumenti/registri per ulteriori informazioni.
     FETCH_ITEMS_FOUND: Trovati {count} elementi modificati.
+    FETCH_NO_ITEMS_FOUND: Non ci sono modifiche da visualizzare. Apporta alcune modifiche per vedere le modifiche elencate qui.
 
     PUBLISH_INVALID_RESPONSE: Risposta non valida dal server durante la pubblicazione di items.
     PUBLISH_UNEXPECTED_ERROR: Errore imprevisto del server o della rete durante la pubblicazione di items.

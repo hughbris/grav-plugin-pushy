@@ -98,9 +98,16 @@ class PushyAdmin {
     }
     displayItems() {
         this.clearInputs();
-        const list = document.querySelector('.list');
+        const list = document.getElementById('list');
         list.innerHTML = '';
+        const summaryWrapper = document.getElementById('summary-wrapper');
+        if (this.changedItems.length == 0) {
+            summaryWrapper.style.display = 'none';
+            this.showNoItemsFoundMessage();
+            return;
+        }
         this.addHeaderToList(list);
+        summaryWrapper.style.display = 'default';
         for (let i = 0; i < this.changedItems.length; i++) {
             const item = this.changedItems[i];
             let innerHTML = '';
@@ -198,6 +205,12 @@ class PushyAdmin {
         list.append(...header.content.children);
         this.addEventHandlerToSelectAll();
     }
+    showNoItemsFoundMessage() {
+        const template = document.createElement('template');
+        template.innerHTML = `<p id="noitmsfound">${pushy.translations.fetchNoItemsFound}</p>`;
+        const noItemsFound = document.getElementById('no-items-found');
+        noItemsFound.append(template.content.firstChild);
+    }
     addEventHandlerToSelectAll() {
         const selectAllCheckbox = document.getElementById('select-all');
         selectAllCheckbox.addEventListener('click', () => {
@@ -241,7 +254,6 @@ class PushyAdmin {
         }
     }
     setBannerText(message, type) {
-        // this.clearBannerText();
         const newMessage = document.createElement('div');
         newMessage.className = `${BannerStyle[type]} alert publish`;
         const newContent = document.createTextNode(message);

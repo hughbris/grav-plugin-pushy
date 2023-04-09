@@ -41,6 +41,7 @@ declare const pushy: {
         fetchInvalidResponse: string,
         fetchException: string,
         fetchItemsFound: string,
+        fetchNoItemsFound: string,
         publishInvalidResponse: string,
         publishException: string,
         statusNew: string,
@@ -132,6 +133,7 @@ class PushyAdmin {
 
         if (this.changedItems) {
             const text = pushy.translations.fetchItemsFound.replace('{count}', this.changedItems.length.toString());
+
             this.setBannerText(text, BannerStyle.info);
             this.updateMenuBadge();
             this.displayItems();
@@ -163,9 +165,21 @@ class PushyAdmin {
     private displayItems() {
         this.clearInputs();
 
-        const list: HTMLElement | null = document.querySelector('.list');
-        list!.innerHTML = '';
+        const list = document.getElementById('list') as HTMLElement;
+        list.innerHTML = '';
+
+        const summaryWrapper: HTMLElement = document.getElementById('summary-wrapper') as HTMLElement;
+
+        if (this.changedItems.length == 0) {
+            summaryWrapper.style.display = 'none';
+
+            this.showNoItemsFoundMessage();
+
+            return;
+        }
+
         this.addHeaderToList(list!);
+        summaryWrapper.style.display = 'default';
 
         for (let i = 0; i < this.changedItems.length; i++) {
             const item: ChangedItem = this.changedItems[i];
@@ -242,7 +256,7 @@ class PushyAdmin {
                 innerHTML += `<div class="edit"></div>`;
             }
 
-            this.addItemToList(list!, innerHTML);
+            this.addItemToList(list, innerHTML);
         };
 
         const checkboxes = document.getElementsByClassName('selectbox');
@@ -268,6 +282,14 @@ class PushyAdmin {
         list.append(...header.content.children);
 
         this.addEventHandlerToSelectAll();
+    }
+
+    public showNoItemsFoundMessage() {
+        const template = document.createElement('template');
+        template.innerHTML = `<p id="noitmsfound">${pushy.translations.fetchNoItemsFound}</p>`;
+        
+        const noItemsFound = document.getElementById('no-items-found') as HTMLElement;
+        noItemsFound.append(template.content.firstChild!);
     }
 
     public addEventHandlerToSelectAll() {
@@ -324,8 +346,6 @@ class PushyAdmin {
     }
 
     public setBannerText(message: string, type: BannerStyle) {
-        // this.clearBannerText();
-
         const newMessage = document.createElement('div');
         newMessage.className = `${BannerStyle[type]} alert publish`;
 

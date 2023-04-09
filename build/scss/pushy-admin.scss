@@ -19,53 +19,57 @@
     margin-bottom: 1px;
 }
 
-.pushy {
+#pushy {
 
     .edit {
         text-align: center;
     }
 
-    .list {
+    #no-items-found {
+        margin: 0 1.5rem;
+    }
+
+    #list {
         display: grid;
         grid-template-columns: fit-content(0) fit-content(0) 1fr fit-content(0);
         column-gap: 1em;
         row-gap: 0.5rem;
         margin: 0 1.5rem;
-    }
-    .list .header {
-        font-weight: bold;
-    }
 
-    .message-summary,
-    .message-description {
-        margin: 1rem 1.5rem;
-    }
-
-    #summary.invalid {
-        border: 1px solid red;
-    }
-
-    #summary-alert {
-        color: red;
-        font-size: .75rem;
-        visibility: hidden;
-
-        &.invalid {
-            margin-top: .5rem !important;
-            visibility: initial;
+        .header {
+            font-weight: bold;
         }
     }
 
-    input[type=text],
-    textarea {
-        border: 1px solid #e6e6e6;
-        background: #fcfcfc;
-        color: #646e7c;
-    }
+    #summary-wrapper {
+        margin: 1rem 1.5rem;
 
-    .required {
-        color: red;
-        font-size: 1.25rem;
+        #summary.invalid {
+            border: 1px solid red;
+        }
+    
+        #summary-alert {
+            color: red;
+            font-size: .75rem;
+            visibility: hidden;
+    
+            &.invalid {
+                margin-top: .5rem !important;
+                visibility: initial;
+            }
+        }
+    
+        input[type=text],
+        textarea {
+            border: 1px solid #e6e6e6;
+            background: #fcfcfc;
+            color: #646e7c;
+        }
+    
+        .required {
+            color: red;
+            font-size: 1.25rem;
+        }
     }
 
     i.fa.fa-external-link {

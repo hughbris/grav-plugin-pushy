@@ -2,7 +2,7 @@
 
 The **Pushy** Plugin is an extension for [Grav CMS](https://github.com/getgrav/grav).
 
-Publish ("push") changes to your production environment from your editing (or development or other) environment Admin dashboard.
+Publish ("push") changes to your production environment from the Admin dashboard of your editing environment (or development or other).
 
 This plugin uses Git and is heavily inspired by the [GitSync plugin](https://github.com/trilbymedia/grav-plugin-git-sync). Unlike GitSync, however, there is a lot more manual setup by the developer, less (IMHO) scary magic, and more control. It will never do anything automatically that you haven't set up.
 
@@ -22,7 +22,7 @@ I took Git out of the plugin name and user interface because content editors and
 
 Installing the Pushy plugin can be done in one of three ways: The GPM (Grav Package Manager) installation method lets you quickly install the plugin with a simple terminal command, the manual method lets you do so via a zip file, and the admin method lets you do so via the Admin Plugin.
 
-> After folowing one of the download steps described below, **you need to run `composer install` at the command line from the plugin diectory.** This installs the PHP libraries needed by this plugin. Be sure to run this, if possible, _as the same user that Grav runs as_, otherwise you may need to fix the file permissions of this plugin's `vendor` directory.
+> After following one of the download steps described below, **you need to run `composer install` at the command line from the plugin directory.** This installs the PHP libraries needed by this plugin. Be sure to run this, if possible, _as the same user that Grav runs as_, otherwise you may need to fix the file permissions of this plugin's `vendor` directory.
 
 ### GPM Installation (Preferred)
 
@@ -37,7 +37,7 @@ This will install the Pushy plugin into your `/user/plugins`-directory within Gr
 
 ### Manual Installation
 
-To install the plugin manually, download the zip-version of this repository and unzip it under `/your/site/grav/user/plugins`. Then rename the folder to `pushy`. You can find these files on [GitHub](https://github.com/hughbris/grav-plugin-pushy) or via [GetGrav.org](https://getgrav.org/downloads/plugins).
+To install the plugin manually, download the zip version of this repository and unzip it under `/your/site/grav/user/plugins`. Then rename the folder to `pushy`. You can find these files on [GitHub](https://github.com/hughbris/grav-plugin-pushy) or via [GetGrav.org](https://getgrav.org/downloads/plugins).
 
 You should now have all the plugin files under
 
@@ -108,7 +108,7 @@ There are lots of moving parts in this pipeline and it pays to set them up and t
 ✔ Test this by checking the Git repository status with your Git client (`git status` or using a front end).
 
 #### You are logged into Admin with sufficient permissions
-🦆 You must be logged in as a user in the group 'publishers'.
+🦆 You must be logged in as a user in the group 'publishers' or a superuser.
 
 ✔ Refresh any Admin page and see if "Publishing" or "Publish" comes up in the side menu.
 
@@ -141,10 +141,10 @@ There are lots of moving parts in this pipeline and it pays to set them up and t
 
 > If you are running Grav in a Docker container (or maybe a similar isolated environment), you may need to [set up an SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) or (perhaps more simply) or use a [Personal Access Token (PAT)](https://github.com/settings/tokens) in your remote URL (e.g. https://&lt;TOKEN>@github.com/&lt;USER>/&lt;REPO>.git).
 
-✔ Run `git fetch` as the Grav webserver user on a remote private repository. Make sure you weren't prompted for more input and that no error messages showed.|
+✔ Run `git fetch` as the Grav webserver user on a remote private repository. Make sure you weren't prompted for more input and that no error messages showed.
 
 #### Commits on _E_ trigger a push to `origin`
-🦆 We will set up a post-commit hook on _E_. Create a new file called `post-commit` under `.git/hooks/` with a single line: `git push origin &lt;BRANCHNAME>`. This will be triggered when commits are made. **Make sure you make this file executable** by the webserver user. _You can remove or rename this file or make it non-executable if you want to pause your commit trigger._
+🦆 We will set up a post-commit hook on _E_. Create a new file called `post-commit` under `.git/hooks/` with a single line: `git push origin <BRANCHNAME>`. This will be triggered when commits are made. **Make sure you make this file executable** by the webserver user. _You can remove or rename this file or make it non-executable if you want to pause your commit trigger._
 
 ✔ Try committing through your Git client first if you like. See if it pushes. Then you'll have to set up more small changes to test, repeating some steps above. Now set up a test edit and 'Publish' through Admin (as described above) and check that your changes were pushed to your remote `origin`.
 
@@ -166,12 +166,12 @@ If the path to your Grav `user` directory differs, adapt the `cd` line. Now set 
 cd /var/www/grav/user
 git fetch
 ```
-Change `fetch` to a bolder operation that requires private access if you feel it. Make sure your file is executable. See the note above about using a Private Access Token (PAT) if you are in an isolated environment.
+Change `fetch` to a bolder operation that requires private access if you feel it. Make sure your file is executable. _See the note above about using a Private Access Token (PAT) if you are in an isolated environment like a shell within a Docker container._
 
 ✔ From the `user` folder, as the webserver user, at the command prompt enter `.git/hooks/test-ops.sh`. You should see only happy messages or nothing at all.
 
 #### A dormant custom Grav job is set up on _R_
-🦆 Now we'll set up a test [custom job](https://learn.getgrav.org/17/advanced/scheduler#custom-jobs) in Grav running our test batch script. As a custom job, it's easy to trigger from Grav. You only want to define this job in Grav's scheduler for the _R_ environment, which means you need to edit or create the file at `user/env/&lt;SERVER_HOSTNAME>/config/scheduler.yaml`. Add this test custom job:
+🦆 Now we'll set up a test [custom job](https://learn.getgrav.org/17/advanced/scheduler#custom-jobs) in Grav running our test batch script. As a custom job, it's easy to trigger from Grav. You only want to define this job in Grav's scheduler for the _R_ environment, which means you need to edit or create the file at `user/env/<SERVER_HOSTNAME>/config/scheduler.yaml`. Add this test custom job:
 
 ```yaml
 status:
@@ -181,14 +181,14 @@ custom_jobs:
     command: 'user/.git/hooks/test-ops.sh'
     at: '0 0 31 2 0' # should never run automatically even if this is accidentally disabled
     output: /var/www/grav/logs/test-job.out
-    output_mode: append
+    output_mode: overwrite
 ```
 You may need to adjust some of those file paths for your server setup. This custom job is defined with two precautions against being automatically run: it is disabled, and it only triggers on the 31st February (never).
 
 ✔ You may be able to test initiating this job as the Grav user by triggering it at the command line using `bin/grav scheduler -r test-job`, but I was not able to see my custom job for some reason. However, it did run when triggered at the next test step (webhooks). You can see that the job was triggered by checking its specified `output` file location.
 
 #### _R_ responds to webhooks requests
-🦆 If the plugin is working correctly and webhooks are enabled, Grav should provide responses at certain endpoints defined in the plugin's configuration. Like your test custom job, you'll only want to define this job in Grav's scheduler for the _R_ environment. So edit or create this file at `user/env/<SERVER_HOSTNAME>/config/plugins/pushy.yaml`. Now add this:
+🦆 If the plugin is working correctly and webhooks are enabled, Grav should povide responses at certain endpoints defined in the plugin's configuration. Like your test custom job, you'll only want to define this job in Grav's scheduler for the _R_ environment. So edit or create this file at `user/env/<SERVER_HOSTNAME>/config/plugins/pushy.yaml`. Add this:
 
 ```yaml
 webhooks:
@@ -238,15 +238,23 @@ Optionally add a webhook secret and some conditions after a successful test. You
 
 * [GitSync plugin](https://github.com/trilbymedia/grav-plugin-git-sync) from Trilby Media (mostly @w00fz I think) for inspiration and some code
 * @pamtbaau for assistance with some obscure undocumented Admin techniques that had me stumped
+* @pamtbaau for collaborating and significantly delivering the Admin UI
 
-## To Do / Ideas
+## To Do
 
-The best of these are now in [issues](ttps://github.com/hughbris/grav-plugin-pushy/issues).
-
-- [ ] Allow pull updates to sync with a branch on origin (..auth required?)
+- [ ] ~~Switch the Save page button label to 'Save Draft' and stage the edit to the git index on save - this allows git edits to be attributed to the current user reliably, but seems messy with unstaging some changes especially for renames + edits~~
+- [X] Allow user selection of changes to commit/publish with checkboxes - possibly even an equivalent to `git add -p`
+- [x] Show newly created files within new folders to be clearer - Git currently only shows folders and this could be confusing for new pages (is there a Git option for this??) _`-u` made this easily solved_
+- [ ] Remove folder prefixes from previews of changes if possible - ideally page titles
+- [ ] Allow pull updates to sync with a branch on origin (..auth required)
+- [X] Add an authorisation permission to publish
+- [ ] Provide a "wizard" to generate githook code that can be copied, with instructions
 - [ ] Potentially move the webhooks to a separate plugin
+- [x] Route and respond to webhooks
+- [x] Perhaps allow webhook URLs to map to _(non-)_ scheduled tasks to be triggered in response
 - [ ] CLI, including local webhook creation and remote webhook creation using the Github (etc.) API
 - [ ] Add on-screen instructions for installing Git PHP library using composer if not installed
 - [ ] Use Github's webhook API to test the response from invoking server webhooks, then notify user
 - [ ] Break this README out into smaller docs, it's going to get too involved
 - [ ] Find a good, safe location to recommend placing the executable merge (etc) scripts for on-demand invocation by Grav scheduler
+- [ ] Break these items out into proper GH issues

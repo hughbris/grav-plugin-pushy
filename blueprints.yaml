@@ -1,7 +1,7 @@
 name: Pushy
 slug: pushy
 type: plugin
-version: 0.1.0
+version: 0.1.1
 description: Push with Git to publish changes to your production environment
 icon: bolt # hand-o-right hand-o-up github
 author:

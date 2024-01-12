@@ -132,7 +132,7 @@ There are lots of moving parts in this pipeline and it pays to set them up and t
 ✔ Check that no errors show. Now check your Git log for a correct entry.
 
 #### _E_ is connected to your `origin` remote repository
-🦆 In Git, if your repository isn't yet been connected to `origin`, add it using `git remote add origin <URL>` or using a Git front end.
+🦆 In Git, if your repository isn't yet connected to `origin`, add it using `git remote add origin <URL>` or using a Git front end.
 
 ✔ Test this by running a `git fetch` (or equivalent) and looking for errors.
 
@@ -179,18 +179,19 @@ status:
 custom_jobs:
   test-job:
     command: 'user/.git/hooks/test-ops.sh'
-    at: '0 0 31 2 0' # should never run automatically even if this is accidentally disabled
+    at: '0 0 31 2 0' # should never run automatically even if this is accidentally enabled
     output: /var/www/grav/logs/test-job.out
     output_mode: overwrite
 ```
 You may need to adjust some of those file paths for your server setup. This custom job is defined with two precautions against being automatically run: it is disabled, and it only triggers on the 31st February (never).
 
-✔ You may be able to test initiating this job as the Grav user by triggering it at the command line using `bin/grav scheduler -r test-job`, but I was not able to see my custom job for some reason. However, it did run when triggered at the next test step (webhooks). You can see that the job was triggered by checking its specified `output` file location.
+✔ You should be able to test initiating this job as the Grav user by triggering it at the command line using `bin/grav scheduler -r test-job --env=<SERVER_HOSTNAME>`. You can check that the job was triggered by checking its specified `output` file location.
 
 #### _R_ responds to webhooks requests
 🦆 If the plugin is working correctly and webhooks are enabled, Grav should povide responses at certain endpoints defined in the plugin's configuration. Like your test custom job, you'll only want to define this job in Grav's scheduler for the _R_ environment. So edit or create this file at `user/env/<SERVER_HOSTNAME>/config/plugins/pushy.yaml`. Add this:
 
 ```yaml
+enabled: true
 webhooks:
   enabled: true
   path: /_webhooks

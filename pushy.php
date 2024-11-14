@@ -105,12 +105,12 @@ class PushyPlugin extends Plugin
 	 * Register new permission to list of permissions for Account and Group
 	 */
 	public function onRegisterPermissions(PermissionsRegisterEvent $event): void
-    {
-        $actions = PermissionsReader::fromYaml("plugin://{$this->name}/permissions.yaml");
+	{
+		$actions = PermissionsReader::fromYaml("plugin://{$this->name}/permissions.yaml");
 
-        $permissions = $event->permissions;
-        $permissions->addActions($actions);
-    }
+		$permissions = $event->permissions;
+		$permissions->addActions($actions);
+	}
 
 	/**
 	 * Show the publishing menu item(s) in Admin
@@ -467,18 +467,18 @@ class PushyPlugin extends Plugin
 		return $translations;
 	}
 
-    private function translate(string $key, ?string $arg = null) : string {
-        $prefix = 'PLUGIN_PUSHY';
+	private function translate(string $key, ?string $arg = null) : string {
+		$prefix = 'PLUGIN_PUSHY';
 
-        $user = $this->grav['user'];
-        $language = $user['language'];
+		$user = $this->grav['user'];
+		$language = $user['language'];
 
-        $translation = $this->grav['language']->translate(["$prefix.$key", $arg], [$language]);
+		$translation = $this->grav['language']->translate(["$prefix.$key", $arg], [$language]);
 
-        if ($translation == "$prefix.$key") {
-            $translation = $this->grav['language']->translate(["$prefix.$key", $arg], ['en']);
-        }
+		if ($translation == "$prefix.$key") {
+			$translation = $this->grav['language']->translate(["$prefix.$key", $arg], ['en']);
+		}
 
-        return $translation;
-    }
+		return $translation;
+	}
 }

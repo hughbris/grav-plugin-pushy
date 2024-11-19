@@ -135,29 +135,29 @@ class RequestHandler
      */
     private function addChangedPage(array $gitItem, Pages $pages, string $adminRoute): ChangedItem
     {
+        if ($gitItem['index'] === 'D') {
+            return new ChangedItem($gitItem, GitItemType::Page);
+        }
+
         $pageFilePath = GRAV_WEBROOT . DS . GRAV_USER_PATH . DS . $gitItem['path'];
         // Remove filename from path
         $pageFolderPath = implode('/', array_slice(explode('/', $pageFilePath), 0, -1));
 
-        if ($gitItem['index'] === 'D') {
-            return new ChangedItem($gitItem, GitItemType::Page);
-        } else {
-            /** @var Page */
-            $page = $pages->get($pageFolderPath);
+        /** @var Page */
+        $page = $pages->get($pageFolderPath);
 
-            $pageTitle = $page->title();
-            $pageAdminUrl = $pages->baseUrl() . "$adminRoute/pages{$page->rawRoute()}";
-            $pageSiteUrl = $page->url();
-            $type = GitItemType::Page;
+        $pageTitle = $page->title();
+        $pageAdminUrl = $pages->baseUrl() . "$adminRoute/pages{$page->rawRoute()}";
+        $pageSiteUrl = $page->url();
+        $type = GitItemType::Page;
 
-            if ($page->isModule()) {
-                $pageTitle .= ' (module)';
-                $pageSiteUrl = '';
-                $type = GitItemType::Module;
-            }
-
-            return new ChangedItem($gitItem, $type, $pageTitle, $pageAdminUrl, $pageSiteUrl);
+        if ($page->isModule()) {
+            $pageTitle .= ' (module)';
+            $pageSiteUrl = $page->parent()->url();
+            $type = GitItemType::Module;
         }
+
+        return new ChangedItem($gitItem, $type, $pageTitle, $pageAdminUrl, $pageSiteUrl);
     }
 
     /**
@@ -167,17 +167,22 @@ class RequestHandler
      */
     private function addChangedConfig(array $gitItem): ChangedItem
     {
-        if (str_starts_with($gitItem['path'], 'config/plugins')) {
-            // Remove '/config'
-            $itemFilePath = substr($gitItem['path'], 7);
-        } else {
-            $itemFilePath = $gitItem['path'];
+        if ($gitItem['index'] === 'D') {
+            return new ChangedItem($gitItem, GitItemType::Config);
+        }
+
+        $itemFilePath = $gitItem['path'];
+        $itemAdminUrl = $itemFilePath;
+
+        if (str_starts_with($itemAdminUrl, 'config/plugins')) {
+            // Remove leading 'config'
+            $itemAdminUrl = substr($itemAdminUrl, 7);
         }
 
         // Remove file extension
-        $itemAdminUrl = preg_replace("/^(.*)\.[^.]+$/", "$1", $itemFilePath);
+        $itemAdminUrl = preg_replace("/^(.*)\.[^.]+$/", "$1", $itemAdminUrl);
 
-        return new ChangedItem($gitItem, GitItemType::Config, '', $itemAdminUrl);
+        return new ChangedItem($gitItem, GitItemType::Config, $itemFilePath, $itemAdminUrl);
     }
 
     /**

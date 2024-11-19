@@ -154,10 +154,18 @@ class PushyAdmin {
                 }
             }
             else if (item.type == GitItemType.Module) {
-                innerHTML += item.title;
+                innerHTML +=
+                    `
+                    <div class="path">
+                        <a href="${item.siteUrl}" target="_blank">
+                            ${pathTitle}
+                            <i class="fa fa-external-link"></i>
+                        </a>
+                    </div>
+                    `;
             }
             else if (item.type == GitItemType.Config) {
-                innerHTML += item.path;
+                innerHTML += `<div class="path">${pathTitle}</div>`;
             }
             else if (item.type == GitItemType.Other && item.siteUrl) {
                 innerHTML +=
@@ -169,7 +177,7 @@ class PushyAdmin {
                     `;
             }
             else {
-                innerHTML += item.path;
+                innerHTML += `<div class="path">${item.path}</div>`;
             }
             // Set icon for editing item
             if (item.adminUrl) {

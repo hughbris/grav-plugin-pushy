@@ -1,12 +1,13 @@
-# v0.1.0
-##  07-04-2023
+# v0.1.2
+## 19-11-2024
 
-1. [](#new)
-  * Detects and displays file renames in a clearer way
 2. [](#improved)
-  * Switched out PHP Git libraries [#11](https://github.com/hughbris/grav-plugin-pushy/issues/11)
+  * NPM updates
+  * Composer updates
+  * Small improvements to changes listing UI (58f7065; 22a466e); _thanks @pamtbaau_
 3. [](#bugfix)
-  * Solve git errors on renames and deletes [#24](https://github.com/hughbris/grav-plugin-pushy/issues/24)
+  * Fix translation fallback bug [#35](https://github.com/hughbris/grav-plugin-pushy/issues/35); _thanks @pamtbaau for the PR_
+  * Fix changes to some file types not rendering in list (903503b); _thanks @pamtbaau_
 
 # v0.1.1
 ## 10-04-2023
@@ -19,3 +20,13 @@
   * Much better display when changes are not detected
 3. [](#bugfix)
   * Change count badge in Admin menu now counts renames as single change, as per changed items listing [c52dc16](https://github.com/hughbris/grav-plugin-pushy/commit/c52dc16652545179a6009de3b37271648d5f199f)
+
+# v0.1.0
+##  07-04-2023
+
+1. [](#new)
+  * Detects and displays file renames in a clearer way
+2. [](#improved)
+  * Switched out PHP Git libraries [#11](https://github.com/hughbris/grav-plugin-pushy/issues/11)
+3. [](#bugfix)
+  * Solve git errors on renames and deletes [#24](https://github.com/hughbris/grav-plugin-pushy/issues/24)

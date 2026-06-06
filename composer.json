@@ -2,7 +2,7 @@
   "name": "hughbris/pushy",
   "type": "grav-plugin",
   "description": "Push with Git to publish changes to your production environment",
-  "keywords": ["plugin"],
+  "keywords": ["plugin", "git"],
   "homepage": "https://github.com/hughbris/grav-plugin-pushy",
   "license": "MIT",
   "authors": [

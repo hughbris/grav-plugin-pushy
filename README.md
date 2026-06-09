@@ -213,7 +213,12 @@ webhooks:
   endpoints:
     publish:
       run: test-job
+      # conditions:
+        # you'll likely want one or more for your real script (see below)
 ```
+
+> [!TIP]
+> Refer to [Configuration options](#configuration) for the available endpoint `conditions` you will probably want to add to your endpoints. I typically use it to respond after commits to a specific branch only.
 
 ✔ Test the webhook you defined by sending POST requests to https://&lt;your-server>/_webhooks/publish. If you don't have an easy way to do this, you can test it in the next step too. Here are some test requests and expected responses using curl:
 

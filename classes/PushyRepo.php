@@ -191,7 +191,7 @@ class PushyRepo extends GitRepository {
 			'A' => 'New file',
 			'M' => 'Modified',
 			'R' => 'Renamed',
-		];
+			];
 		return $symbols($symbol);
 	}
 }

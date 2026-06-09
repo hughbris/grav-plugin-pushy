@@ -4,7 +4,6 @@ namespace Grav\Plugin\Pushy;
 
 use Grav\Common\Config\Config;
 use Grav\Common\Grav;
-use SebastianBergmann\Git\RuntimeException;
 
 class GitUtils {
 

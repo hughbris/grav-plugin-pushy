@@ -20,8 +20,7 @@ use Grav\Plugin\Pushy\GitUtils;
  * Class PushyPlugin
  * @package Grav\Plugin
  */
-class PushyPlugin extends Plugin
-{
+class PushyPlugin extends Plugin {
 	/** @var PushyRepo */
 	protected $repo;
 
@@ -31,8 +30,7 @@ class PushyPlugin extends Plugin
 	/**
 	 * @return array
 	 */
-	public static function getSubscribedEvents(): array
-	{
+	public static function getSubscribedEvents(): array {
 		return [
 			'onPluginsInitialized' => [
 				['onPluginsInitialized', 0],
@@ -45,24 +43,21 @@ class PushyPlugin extends Plugin
 	 *
 	 * @return ClassLoader
 	 */
-	public function autoload(): ClassLoader
-	{
+	public function autoload(): ClassLoader {
 		return require __DIR__ . '/vendor/autoload.php';
 	}
 
 	/**
 	 * Initialize the class instance
 	 */
-	public function init(): void
-	{
+	public function init(): void {
 		$this->repo = new PushyRepo();
 	}
 
 	/**
 	 * Initialize the plugin
 	 */
-	public function onPluginsInitialized(): void
-	{
+	public function onPluginsInitialized(): void {
 		if ($this->isAdmin()) {
 			$this->init();
 
@@ -83,8 +78,9 @@ class PushyPlugin extends Plugin
 				'onTwigSiteVariables' => ['setTwigSiteVariables', 0],
 				'onAssetsInitialized' => ['onAssetsInitialized', 0],
 				PermissionsRegisterEvent::class => ['onRegisterPermissions', 0],
-			]);
-		} else {
+				]);
+		}
+		else {
 			$this->enable([
 				'onPageInitialized' => ['serveHooks', 0],
 				]);
@@ -94,8 +90,7 @@ class PushyPlugin extends Plugin
 	/**
 	 * Get admin page template
 	 */
-	public function setAdminTwigTemplatePaths(Event $event): void
-	{
+	public function setAdminTwigTemplatePaths(Event $event): void {
 		$paths = $event['paths'];
 		$paths[] = __DIR__ . DS . 'admin/templates';
 		$event['paths'] = $paths;
@@ -104,8 +99,7 @@ class PushyPlugin extends Plugin
 	/**
 	 * Register new permission to list of permissions for Account and Group
 	 */
-	public function onRegisterPermissions(PermissionsRegisterEvent $event): void
-	{
+	public function onRegisterPermissions(PermissionsRegisterEvent $event): void {
 		$actions = PermissionsReader::fromYaml("plugin://{$this->name}/permissions.yaml");
 
 		$permissions = $event->permissions;
@@ -144,8 +138,7 @@ class PushyPlugin extends Plugin
 	/**
 	 * Set any special variables for Twig templates
 	 */
-	public function setTwigSiteVariables(): void
-	{
+	public function setTwigSiteVariables(): void {
 		$publish_path = $this->config->get('plugins.admin.route') . DS . $this->admin_route;
 		$route = $this->grav['uri']->path();
 
@@ -368,7 +361,6 @@ class PushyPlugin extends Plugin
 		return FALSE;
 	}
 
-	// TODO: this can be static
 	/**
 	 * Provide a HTTP status and JSON response and exit
 	 * @param  int    $http_status   HTTP status number to return

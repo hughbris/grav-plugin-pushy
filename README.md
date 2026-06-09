@@ -170,6 +170,20 @@ Change `fetch` to a bolder operation that requires private access if you feel it
 
 ✔ From the `user` folder, as the webserver user, at the command prompt enter `.git/hooks/test-ops.sh`. You should see only happy messages or nothing at all.
 
+> [!IMPORTANT]
+>  Once you have tested your dummy script and are ready to create your real fetch-and-merge script, make sure you set `--no-edit` on any `git merge` operations. If you don't use that flag, your script might block while it opens an editor and waits for user input. My script, with verbose test output, is usually something like:
+```sh
+cd /var/www/grav/user                                && echo changed directory
+git fetch && git merge --no-edit origin/<BRANCHNAME> && echo fetched and merged
+git push origin develop                              && echo pushed
+tag=prod-`date +%Y%m%d%H%M%S`
+git tag -a $tag -m "Merged <BRANCHNAME>"             && echo tagged
+git push origin $tag                                 && echo pushed tag $tag
+
+# optional post update scripts, cache resets etc
+# cd .. && bin/plugin tntsearch index -q && echo start reindex
+```
+
 #### A dormant custom Grav job is set up on _R_
 🦆 Now we'll set up a test [custom job](https://learn.getgrav.org/17/advanced/scheduler#custom-jobs) in Grav running our test batch script. As a custom job, it's easy to trigger from Grav. You only want to define this job in Grav's scheduler for the _R_ environment, which means you need to edit or create the file at `user/env/<SERVER_HOSTNAME>/config/scheduler.yaml`. Add this test custom job:
 

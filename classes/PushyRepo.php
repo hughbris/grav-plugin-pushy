@@ -5,21 +5,32 @@ use Grav\Common\Grav;
 use Grav\Common\Plugin;
 use Grav\Common\Utils;
 use http\Exception\RuntimeException;
-use CzProject\GitPhp\GitRepository;
+use GitElephant\Repository;
+use GitElephant\Status\Status;
 use Grav\Common\User\DataUser\User;
 
-class PushyRepo extends GitRepository {
+class PushyRepo extends Repository {
 
 	/** @var Grav */
 	protected $grav;
 
 	/** @var array */
-	protected $config;
+	protected $config, $configured_paths;
 
-	public function __construct() {
-		parent::__construct(USER_DIR, $this->runner);
+	public function __construct($path=NULL) {
+		$path = $path ?? USER_DIR;
 		$this->grav = Grav::instance();
 		$this->setConfig($this->grav['config']->get('plugins.pushy'));
+
+		parent::__construct($path);
+
+		$this->addGlobalConfig('core.quotePath', 'false');
+		$this->addGlobalConfig('i18n.commitEncoding', 'utf-8');
+		$this->addGlobalConfig('i18n.logOutputEncoding', 'utf-8');
+		$this->addGlobalConfig('status.showUntrackedFiles', 'all');
+		$this->addGlobalConfig('status.renames', 'true'); // still doesn't work ...
+
+		$this->configured_paths = $this->getConfig('folders');
 	}
 
 	/**
@@ -30,76 +41,51 @@ class PushyRepo extends GitRepository {
 	}
 
 	/**
-	 * Are there changes?
-	 * `git status` + magic
-	 * @return bool
-	 * @throws GitException
+	 * @param string $key
+	 * @return mixed
 	 */
-	/* overloads \CzProject\GitPhp\GitRepository::hasChanges() which does not provide a pathspec argument */
-	public function hasChanges($folders=[])	{
-		// Make sure the `git status` gets a refreshed look at the working tree.
-		$this->run('update-index', '-q', '--refresh');
-		$result = $this->run('status', implode(' ', $folders), '--porcelain');
-		return $result->hasOutput();
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function hasChangesToCommit() {
-		return $this->hasChanges($this->config['folders']);
+	public function getConfig($key=NULL) {
+		if ($key) {
+			return Utils::getDotNotation($this->config, $key);
+		}
+		// else ..
+		return $this->config;
 	}
 
 	/**
 	 * @return array
 	 */
-	public function getChangedItems() {
-        // Todo: Use prober library API
-        $this->execute(['add', '--all']);
-        $statusItems = $this->statusParsed();
-        $this->execute(['reset', '.']);
+	public function getChangedItems(): Array {
+        // $this->addGlobalCommandArgument('--update');
+		foreach($this->configured_paths as $path) {
+			$this->stage();
+		}
+		$statusItems = $this->statusParsed();
+		$this->unstage(implode(' ', $this->configured_paths));
 
 		return $statusItems;
 	}
 
 	/**
+	 * parse changes into legacy array structure
 	 * @return array
 	 */
-	private function statusLines($filter=TRUE) {
-		$command = explode(' ', 'status -u --find-renames --porcelain');
-		if ($filter) {
-			$command = array_merge($command, $this->config['folders']);
-		}
-		return $this->execute($command);
-	}
+	private function statusParsed(): Array {
 
-	/**
-	 * @return string
-	 */
-	public static function listFiles($statusListing) {
-		return implode(' ', array_column($statusListing, 'path'));
-	}
-
-	/**
-	 * @return array
-	 */
-	public function statusParsed($filter=TRUE) {
-		$changes = $this->statusLines($filter);
+		$changes = $this->getPushyStatus($this->configured_paths)->all();
 		$ret = [];
 
 		foreach ($changes as $change) {
 			$members = [
-				'working' => substr($change, 1, 1),
-				'index' => substr($change, 0, 1),
+				'working' => $change->getWorkingTreeStatus() ?: ' ',
+				'index' => $change->getIndexStatus() ?: ' ',
 				];
 
-			$paths = explode(' -> ', substr($change, 3));
-			
-			if(count($paths) === 1) {
-				$members['path'] = $paths[0];
-			} else {
-				$members['orig_path'] = $paths[0];
-				$members['path'] = $paths[1];
+			$members['path'] = $change->getName();
+
+			if($change->isRenamed()) {
+				$members['orig_path'] = $change->getName();
+				$members['path'] = $change->getRenamed();
 			}
 
 			array_push($ret, $members);
@@ -108,90 +94,60 @@ class PushyRepo extends GitRepository {
 	}
 
 	/**
-	 * @return array
+	 * extend getStatus() with extra command argument(s) for current command only, not "global"
 	 */
-	public function statusUnstaged($filter=TRUE) {
-		return $this->statusSelect($filter);
+	public function getPushyStatus($args): Status {
+		// bit of a faff ...
+
+		// stash a copy of any initial global arguments ..
+		$globalArgumentsCache = $this->getGlobalCommandArguments();
+
+		// add in any $args passed ..
+		foreach($args as $arg) {
+			$this->addGlobalCommandArgument($arg);
+		}
+
+		// stash the return status ..
+		$ret = $this->getStatus();
+
+		// purge the "global" command arguments ..
+		foreach($this->getGlobalCommandArguments() as $arg) {
+			$this->removeGlobalCommandArgument($arg);
+		}
+
+		// restore the stashed initial global arguments ..
+		foreach($globalArgumentsCache as $arg) {
+			$this->addGlobalCommandArgument($arg);
+		}
+
+		return $ret;
 	}
 
 	/**
-	 * @return array
+	 * stage and commit selected paths with message
 	 */
-	public function statusSelect($path_filter=TRUE, $env='working', $select='MTDRC?A') {
-		$status = $this->statusParsed($path_filter);
-		return array_values(array_filter($status, function($v) use ($env, $select) {
-			return in_array($v[$env], str_split($select));
-			}));
-	}
+	public function publish(Array $items, String $message): VOID {
+		// more faffing with "global" command arguments ... see:
+		//  * https://github.com/matteosister/GitElephant/pull/67
+		//  * https://github.com/matteosister/GitElephant/issues/122
 
-	/**
-	 * @return void
-	 */
-	public function stageFiles($statusListing=NULL) {
-		if (is_null($statusListing)) {
-			$files = self::listFiles($this->statusUnstaged());
-		}
-		else {
-			$files = $statusListing;
-		}
-		if (!empty($files)) {
-			$command = array_merge(['add', '--all'], explode(' ', $files));
-			$this->execute($command);
-		}
-	}
+		$restore = !in_array('--all', $this->getGlobalCommandArguments());
 
-	/**
-	 * @param string $message
-	 * @return string[]
-	 */
-	public function commit($message, $options = []) {
+		$this->addGlobalCommandArgument('--all');
 
-		if(!isset($this->grav['session'])) {
-			return; // FIXME
+		foreach ($items as $item) {
+			$this->stage($item['path']);
+			if ($item['index'] === 'R') {
+				$this->stage($item['orig_path']);
+			}
 		}
 
-		// TODO: process placeholders/Twig in $message
-
-		/** @var User */
-		$user = $this->grav['session']->user;
-
-		if ($user !== null && $user->authenticated) {
-			$name = $this->grav['session']->user->fullname; // TODO: add fallback as this is not required I think
-			$email = $this->grav['session']->user->email;
-	
-			$author = "$name <$email>";
-			$options[] = "--author=\"$author\"";
+		if($restore) {
+			$this->removeGlobalCommandArgument('--all');
 		}
 
-		parent::commit($message, $options);
+		$this->commit($message);
+
 	}
 
-	/**
-	 * @param string $type
-	 * @param mixed $value
-	 * @return mixed
-	 */
-	public function getGitConfig($type, $default) {
-		return $this->config['git'][$type] ?? $default;
-	}
-
-	/**
-	 * @param string $type
-	 * @param mixed $value
-	 * @return mixed
-	 */
-	public function getConfig($type, $value) {
-		return $value ?: ($this->config[$type] ?? $value);
-	}
-
-	public static function combobulate($symbol) {
-		// TODO: see if I can define symbols as 'Git' language words in translations, and translate them to English there
-		// For now:
-		$symbols = [
-			'A' => 'New file',
-			'M' => 'Modified',
-			'R' => 'Renamed',
-			];
-		return $symbols($symbol);
-	}
 }

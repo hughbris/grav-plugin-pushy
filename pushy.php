@@ -15,12 +15,14 @@ use Grav\Plugin\Pushy\RequestHandler;
 use RocketTheme\Toolbox\Event\Event;
 use Grav\Plugin\Pushy\PushyRepo;
 use Grav\Plugin\Pushy\GitUtils;
+use Grav\Plugin\Pushy\Helpers;
 
 /**
  * Class PushyPlugin
  * @package Grav\Plugin
  */
 class PushyPlugin extends Plugin {
+
 	/** @var PushyRepo */
 	protected $repo;
 
@@ -30,7 +32,8 @@ class PushyPlugin extends Plugin {
 	/**
 	 * @return array
 	 */
-	public static function getSubscribedEvents(): array {
+	public static function getSubscribedEvents(): array
+	{
 		return [
 			'onPluginsInitialized' => [
 				['onPluginsInitialized', 0],
@@ -78,9 +81,8 @@ class PushyPlugin extends Plugin {
 				'onTwigSiteVariables' => ['setTwigSiteVariables', 0],
 				'onAssetsInitialized' => ['onAssetsInitialized', 0],
 				PermissionsRegisterEvent::class => ['onRegisterPermissions', 0],
-				]);
-		}
-		else {
+			]);
+		} else {
 			$this->enable([
 				'onPageInitialized' => ['serveHooks', 0],
 				]);
@@ -109,8 +111,7 @@ class PushyPlugin extends Plugin {
 	/**
 	 * Show the publishing menu item(s) in Admin
 	 */
-	public function showPublishingMenu(): void
-	{
+	public function showPublishingMenu(): void {
 		$isInitialized = GitUtils::isGitInitialized();
 		// TODO: test for GitUtils::isGitInstalled()
 		$menuLabel = $isInitialized ? $this->translate('MENU_LABEL_PUBLISH') : $this->translate('MENU_LABEL_CONFIG');
@@ -148,7 +149,7 @@ class PushyPlugin extends Plugin {
 		$twig = $this->grav['twig'];
 
 		if ($isInitialized && $route == $publish_path) {
-			$twig->twig_vars['git_index'] = $this->repo->statusSelect(); # TRUE, $env='index', $select='MTDRCA');
+			$twig->twig_vars['git_index'] = $this->repo->getChangedItems();
 		}
 
 		$twig->twig_vars['isAuthorised'] = $this->grav['user']->authorize('admin.publisher');
@@ -460,17 +461,7 @@ class PushyPlugin extends Plugin {
 	}
 
 	private function translate(string $key, ?string $arg = null) : string {
-		$prefix = 'PLUGIN_PUSHY';
-
-		$user = $this->grav['user'];
-		$language = $user['language'];
-
-		$translation = $this->grav['language']->translate(["$prefix.$key", $arg], [$language]);
-
-		if ($translation == "$prefix.$key") {
-			$translation = $this->grav['language']->translate(["$prefix.$key", $arg], ['en']);
-		}
-
-		return $translation;
+		return Helpers::translate($key, $arg);
 	}
+
 }

@@ -76,32 +76,28 @@ class RequestHandler
      * 
      * @return ChangedItem[]
      */
-    private function handleReadTask()
-    {
+    private function handleReadTask() {
+        return $this->toChangedItemObjects($this->repo->getChangedItems());
+    }
+
+    function toChangedItemObjects($items) {
         /** @var Pages */
         $pages = $this->grav['pages'];
         $pages->enablePages();
 
         $adminRoute = $this->grav['config']->get('plugins.admin.route');
 
-        /** var ChangedItem[] */
-        $changedItems = [];
-
-        $statusItems = $this->repo->getChangedItems();
-
-        if ($statusItems) {
-            foreach ($statusItems as $item) {
-                if ($this->isPage($item)) {
-                    $changedItems[] = $this->addChangedPage($item, $pages, $adminRoute);
-                } elseif ($this->isConfig($item)) {
-                    $changedItems[] = $this->addChangedConfig($item);
-                } else {
-                    $changedItems[] = $this->addChangedOther($item, $pages->baseUrl());
-                }
+        $objects = [];
+        foreach ($items as $item) {
+            if ($this->isPage($item)) {
+                $objects[] = $this->addChangedPage($item, $pages, $adminRoute);
+            } elseif ($this->isConfig($item)) {
+                $objects[] = $this->addChangedConfig($item);
+            } else {
+                $objects[] = $this->addChangedOther($item, $pages->baseUrl());
             }
         }
-
-        return $changedItems;
+        return $objects;
     }
 
     /**
@@ -147,13 +143,13 @@ class RequestHandler
         $page = $pages->get($pageFolderPath);
 
         $pageTitle = $page->title();
-        $pageAdminUrl = $pages->baseUrl() . "$adminRoute/pages{$page->rawRoute()}";
-        $pageSiteUrl = $page->url();
+        $pageAdminUrl = $pages->baseUrl() . "$adminRoute/pages{$page->rawRoute()}"; // TODO: check if Admin URLs use the page route or path
+        $pageSiteUrl = urldecode($page->url());
         $type = GitItemType::Page;
 
         if ($page->isModule()) {
             $pageTitle .= ' (module)';
-            $pageSiteUrl = $page->parent()->url();
+            $pageSiteUrl = urldecode($page->parent()->url());
             $type = GitItemType::Module;
         }
 
@@ -208,8 +204,7 @@ class RequestHandler
     /**
      * Handle request to commit array of changed pages.
      */
-    private function handlePublishTask(): GitActionResponse
-    {
+    private function handlePublishTask(): GitActionResponse {
         $taskData = file_get_contents('php://input');
 
         if ($taskData === false) {
@@ -227,19 +222,9 @@ class RequestHandler
         $pages = json_decode($taskData, true);
 
         try {
-            foreach ($pages['items'] as $item) {
-                if ($item['index'] === 'D') {
-                    $this->repo->removeFile($item['path']);
-                } else if ($item['index'] === 'R') {
-                    $this->repo->removeFile($item['orig_path']);
-                    $this->repo->addFile($item['path']);
-                } else {
-                    $this->repo->addFile($item['path']);
-                }
-            }
-
-            $this->repo->commit($pages['message']);
-        } catch (Exception $e) {
+            $this->repo->publish($pages['items'], $pages['message']);
+        }
+        catch (Exception $e) {
             $log = $this->grav['log'];
             $log->addCritical($e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
 
@@ -256,11 +241,6 @@ class RequestHandler
     }
 
     private function translate(string $key, ?string $arg = null) : string {
-        $prefix = 'PLUGIN_PUSHY';
-
-        $user = $this->grav['user'];
-        $language = $user['language'];
-
-		return $this->grav['language']->translate(["$prefix.$key", $arg], [$language]);
+        return Helpers::translate($key, $arg);
     }
 }

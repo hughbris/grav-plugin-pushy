@@ -15,6 +15,7 @@ use Grav\Plugin\Pushy\RequestHandler;
 use RocketTheme\Toolbox\Event\Event;
 use Grav\Plugin\Pushy\PushyRepo;
 use Grav\Plugin\Pushy\GitUtils;
+use Grav\Plugin\Pushy\Webhooks;
 use Grav\Plugin\Pushy\Helpers;
 
 /**
